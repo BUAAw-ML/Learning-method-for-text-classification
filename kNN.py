@@ -282,26 +282,26 @@ a = datetime.datetime.now()
 
 colors = []
 labels = {}
-#
-# f = open("iris.data",'r')
-# i = 1
-# for line in f:
-#     temp = line.rstrip('\n').split(',')
-#     if len(temp) == 5:
-#         G.add_node(i, pars=temp[0:4], type=temp[4], isnew=True, neibs={}, rev_neibs=[], lastchecked=(0, 0))
-#         if G.node[i]['type'] == "Iris-setosa":
-#             colors.append('r')
-#             labels[i] = "setosa"
-#         elif G.node[i]['type'] == "Iris-versicolor":
-#             colors.append('b')
-#             labels[i] = "versicolor"
-#         else:
-#             colors.append('g')
-#             labels[i] = "virginica"
-#         NNAdd(i, K, 10, G)
-#     i += 1
-#
-# f.close()
+
+f = open("iris.data",'r')
+i = 1
+for line in f:
+    temp = line.rstrip('\n').split(',')
+    if len(temp) == 5:
+        G.add_node(i, pars=temp[0:4], type=temp[4], isnew=True, neibs={}, rev_neibs=[], lastchecked=(0, 0))
+        if G.node[i]['type'] == "Iris-setosa":
+            colors.append('r')
+            labels[i] = "setosa"
+        elif G.node[i]['type'] == "Iris-versicolor":
+            colors.append('b')
+            labels[i] = "versicolor"
+        else:
+            colors.append('g')
+            labels[i] = "virginica"
+        NNAdd(i, K, 10, G)
+    i += 1
+
+f.close()
 #
 # for i in reversed(range(1, len(G.nodes())+1)):
 #     NNAdd(i, K, 3, G)
