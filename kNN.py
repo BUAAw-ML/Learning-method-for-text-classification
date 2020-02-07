@@ -276,12 +276,12 @@ for j in [1000, 1250, 1500, 1750, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500
 
 # Iris test
 
-# G = nx.DiGraph()
-#
-# a = datetime.datetime.now()
-#
-# colors = []
-# labels = {}
+G = nx.DiGraph()
+
+a = datetime.datetime.now()
+
+colors = []
+labels = {}
 #
 # f = open("iris.data",'r')
 # i = 1
