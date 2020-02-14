@@ -4,7 +4,7 @@ from models import *
 from util import *
 
 
-parser = argparse.ArgumentParser(description='WILDCAT Training')
+parser = argparse.ArgumentParser(description='Training Super-parameters')
 parser.add_argument('data', metavar='DIR',
                     help='path to dataset (e.g. data/')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
@@ -14,7 +14,7 @@ parser.add_argument('--epochs', default=20, type=int, metavar='N',
 parser.add_argument('--epoch_step', default=[30], type=int, nargs='+',
                     help='number of epochs to change learning rate')
 parser.add_argument('--device_ids', default=[0], type=int, nargs='+',
-                    help='number of epochs to change learning rate')
+                    help='')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=16, type=int,
@@ -41,8 +41,7 @@ def main_PW():
 
     use_gpu = torch.cuda.is_available()
 
-    train_dataset = COCO2014(args.data, phase='train', inp_name='data/ProgrammerWeb/train.csv')
-    val_dataset = COCO2014(args.data, phase='val', inp_name='data/ProgrammerWeb/val.csv')
+    train_dataset, val_dataset = prepareData(args.data,  inp_name='data/ProgrammerWeb/train.csv')
     num_classes = 80
 
     model = gcn_resnet101(num_classes=num_classes, t=0.4, adj_file='data/ProgrammerWeb/domainnet.csv')

@@ -6,7 +6,6 @@ import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torchnet as tnt
-import torchvision.transforms as transforms
 import torch.nn as nn
 from util import *
 
@@ -118,38 +117,10 @@ class Engine(object):
             self.state['loss'].backward()
             optimizer.step()
 
-    def init_learning(self, model, criterion):
 
-        if self._state('train_transform') is None:
-            normalize = transforms.Normalize(mean=model.image_normalization_mean,
-                                             std=model.image_normalization_std)
-            self.state['train_transform'] = transforms.Compose([
-                MultiScaleCrop(self.state['image_size'], scales=(1.0, 0.875, 0.75, 0.66, 0.5), max_distort=2),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ])
-
-        if self._state('val_transform') is None:
-            normalize = transforms.Normalize(mean=model.image_normalization_mean,
-                                             std=model.image_normalization_std)
-            self.state['val_transform'] = transforms.Compose([
-                Warp(self.state['image_size']),
-                transforms.ToTensor(),
-                normalize,
-            ])
-
-        self.state['best_score'] = 0
 
     def learning(self, model, criterion, train_dataset, val_dataset, optimizer=None):
 
-        self.init_learning(model, criterion)
-
-        # define train and val transform
-        train_dataset.transform = self.state['train_transform']
-        train_dataset.target_transform = self._state('train_target_transform')
-        val_dataset.transform = self.state['val_transform']
-        val_dataset.target_transform = self._state('val_target_transform')
 
         # data loading code
         train_loader = torch.utils.data.DataLoader(train_dataset,
