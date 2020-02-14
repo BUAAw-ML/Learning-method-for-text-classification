@@ -2,11 +2,15 @@ import argparse
 from engine import *
 from models import *
 from util import *
+from dataLoader import *
 
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
 parser.add_argument('data', metavar='DIR',
                     help='path to dataset (e.g. data/')
+
+parser.add_argument('-num_classes', default=115, type=int, metavar='N',
+                    help='number of domains')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=20, type=int, metavar='N',
@@ -41,10 +45,9 @@ def main_PW():
 
     use_gpu = torch.cuda.is_available()
 
-    train_dataset, val_dataset = prepareData(args.data,  inp_name='data/ProgrammerWeb/train.csv')
-    num_classes = 80
+    train_dataset, val_dataset = CrossValidationSplitter(args.data,  inp_name='data/ProgrammerWeb/train.csv')
 
-    model = gcn_resnet101(num_classes=num_classes, t=0.4, adj_file='data/ProgrammerWeb/domainnet.csv')
+    model = gcn_resnet101(num_classes=args.num_classes, t=0.4, adj_file='data/ProgrammerWeb/domainnet.csv')
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()
@@ -56,7 +59,7 @@ def main_PW():
                                 weight_decay=args.weight_decay)
 
     state = {'batch_size': args.batch_size, 'max_epochs': args.epochs,
-             'evaluate': args.evaluate, 'resume': args.resume, 'num_classes':num_classes}
+             'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': args.num_classes}
     state['difficult_examples'] = True
     state['save_model_path'] = 'checkpoint/ProgrammerWeb/'
     state['workers'] = args.workers
