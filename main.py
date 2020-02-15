@@ -4,14 +4,15 @@ from models import *
 from util import *
 from dataLoader import *
 
+from datasets.ProgramWeb import ProgramWebDataset, split_train_val_dataset
+
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
-parser.add_argument('-data_path', default='data/ProgrammerWeb/programweb-data.csv', metavar='N',
+parser.add_argument('data', metavar='DIR',
                     help='path to dataset (e.g. data/')
-parser.add_argument('-seed', default=0, type=int, metavar='N',
-                    help='random seed')
-parser.add_argument('-num_classes', default=115, type=int, metavar='N',
-                    help='number of domains')
+
+# parser.add_argument('-num_classes', default=115, type=int, metavar='N',
+#                     help='number of domains')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=20, type=int, metavar='N',
@@ -44,14 +45,13 @@ def main_PW():
     global args, best_prec1, use_gpu
     args = parser.parse_args()
 
-    #use_gpu = torch.cuda.is_available()
+    use_gpu = torch.cuda.is_available()
 
-    data, data_block = CrossValidationSplitter(args.data_path, args.seed)
+    # train_dataset, val_dataset = CrossValidationSplitter(args.data,  inp_name='data/ProgrammerWeb/train.csv')
+    dataset = ProgramWebDataset('data/ProgrammerWeb/programweb-data.csv')
 
-    valData_pos = 9  #take the last part as the val data
-    train_dataset, val_dataset = loadData(data, data_block, valData_pos)
-
-    model = gcn_resnet101(num_classes=args.num_classes, t=0.4, adj_file='data/ProgrammerWeb/domainnet.csv')
+    model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat)
+    train_dataset, val_dataset = split_train_val_dataset(dataset)
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()

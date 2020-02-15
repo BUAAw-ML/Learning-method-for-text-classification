@@ -9,6 +9,8 @@ import torchnet as tnt
 import torch.nn as nn
 from util import *
 
+from datasets.ProgramWeb import collate_fn
+
 tqdm.monitor_interval = 0
 
 class Engine(object):
@@ -74,7 +76,7 @@ class Engine(object):
     def on_end_batch(self, training, model, criterion, data_loader, optimizer=None, display=True):
 
         # record loss
-        self.state['loss_batch'] = self.state['loss'].data[0]
+        self.state['loss_batch'] = self.state['loss'].item()
         self.state['meter_loss'].add(self.state['loss_batch'])
 
         if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
@@ -100,13 +102,8 @@ class Engine(object):
                     data_time=data_time, loss_current=self.state['loss_batch'], loss=loss))
 
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
-
-        input_var = torch.autograd.Variable(self.state['input'])
-        target_var = torch.autograd.Variable(self.state['target'])
-
-        if not training:
-            input_var.volatile = True
-            target_var.volatile = True
+        ids, token_type_ids, attention_mask = self.state['input']
+        target_var = self.state['target']
 
         # compute output
         self.state['output'] = model(input_var)
@@ -117,19 +114,15 @@ class Engine(object):
             self.state['loss'].backward()
             optimizer.step()
 
-
-
     def learning(self, model, criterion, train_dataset, val_dataset, optimizer=None):
-
-
         # data loading code
         train_loader = torch.utils.data.DataLoader(train_dataset,
                                                    batch_size=self.state['batch_size'], shuffle=True,
-                                                   num_workers=self.state['workers'])
+                                                   num_workers=self.state['workers'], collate_fn=collate_fn)
 
         val_loader = torch.utils.data.DataLoader(val_dataset,
                                                  batch_size=self.state['batch_size'], shuffle=False,
-                                                 num_workers=self.state['workers'])
+                                                 num_workers=self.state['workers'], collate_fn=collate_fn)
 
         # optionally resume from a checkpoint
         if self._state('resume') is not None:
@@ -144,15 +137,12 @@ class Engine(object):
             else:
                 print("=> no checkpoint found at '{}'".format(self.state['resume']))
 
-
         if self.state['use_gpu']:
             train_loader.pin_memory = True
             val_loader.pin_memory = True
             cudnn.benchmark = True
 
-
             model = torch.nn.DataParallel(model, device_ids=self.state['device_ids']).cuda()
-
 
             criterion = criterion.cuda()
 
@@ -375,13 +365,9 @@ class MultiLabelMAPEngine(Engine):
 
 class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
-        feature_var = torch.autograd.Variable(self.state['feature']).float()
-        target_var = torch.autograd.Variable(self.state['target']).float()
-        inp_var = torch.autograd.Variable(self.state['input']).float().detach()  # one hot
-        if not training:
-            feature_var.volatile = True
-            target_var.volatile = True
-            inp_var.volatile = True
+        feature_var = self.state['feature'].float()
+        target_var = self.state['target'].float()
+        inp_var = self.state['input'].float().detach()  # one hot
 
         # compute output
         self.state['output'] = model(feature_var, inp_var)

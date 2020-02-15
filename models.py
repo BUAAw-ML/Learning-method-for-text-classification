@@ -3,6 +3,7 @@ from torch.nn import Parameter
 from util import *
 import torch
 import torch.nn as nn
+from transformers import BertModel
 
 class GraphConvolution(nn.Module):
     """
@@ -40,57 +41,45 @@ class GraphConvolution(nn.Module):
                + str(self.out_features) + ')'
 
 
-class GCNResnet(nn.Module):
-    def __init__(self, model, num_classes, in_channel=300, t=0, adj_file=None):
+class GCNBert(nn.Module):
+    def __init__(self, bert, num_classes, t=0, co_occur_mat=None):
         super(GCNResnet, self).__init__()
-        self.features = nn.Sequential(
-            model.conv1,
-            model.bn1,
-            model.relu,
-            model.maxpool,
-            model.layer1,
-            model.layer2,
-            model.layer3,
-            model.layer4,
-        )
+        
+        self.bert = bert
+        
         self.num_classes = num_classes
-        self.pooling = nn.MaxPool2d(14, 14)
 
-        self.gc1 = GraphConvolution(in_channel, 1024)
+        self.gc1 = GraphConvolution(768, 1024)
         self.gc2 = GraphConvolution(1024, 2048)
         self.relu = nn.LeakyReLU(0.2)
 
-        _adj = gen_A(num_classes, t, adj_file)
-        self.A = Parameter(torch.from_numpy(_adj).float())
-        # image normalization
-        self.image_normalization_mean = [0.485, 0.456, 0.406]
-        self.image_normalization_std = [0.229, 0.224, 0.225]
+        _adj = gen_A(num_classes, t, co_occur_mat)
+        self.adj = gen_adj(_adj)
 
-    def forward(self, feature, inp):
-        feature = self.features(feature)
-        feature = self.pooling(feature)
-        feature = feature.view(feature.size(0), -1)
-
-
+    def forward(self, ids, token_type_ids, attention_mask, inp):
+        token_feat = self.bert(ids,
+            token_type_ids=token_type_ids,
+            attention_mask=attention_mask)[0]
+        sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
+            / torch.sum(attention_mask, dim=1, )
+        
         inp = inp[0]
-        adj = gen_adj(self.A).detach()
-        x = self.gc1(inp, adj)
+        x = self.gc1(inp, self.adj)
         x = self.relu(x)
-        x = self.gc2(x, adj)
+        x = self.gc2(x, self.adj)
 
         x = x.transpose(0, 1)
-        x = torch.matmul(feature, x)
+        x = torch.matmul(sentence_feat, x)
         return x
 
     def get_config_optim(self, lr, lrp):
         return [
-                {'params': self.features.parameters(), 'lr': lr * lrp},
+                {'params': self.bert.parameters(), 'lr': lr * lrp},
                 {'params': self.gc1.parameters(), 'lr': lr},
                 {'params': self.gc2.parameters(), 'lr': lr},
                 ]
 
 
-
-def gcn_resnet101(num_classes, t, pretrained=True, adj_file=None, in_channel=300):
-    model = models.resnet101(pretrained=pretrained)
-    return GCNResnet(model, num_classes, t=t, adj_file=adj_file, in_channel=in_channel)
+def gcn_bert(num_classes, t, co_occur_mat=None):
+    bert = BertModel.from_pretrained('bert-base-uncased')
+    return GCNBert(bert, num_classes, t=t, co_occur_mat=co_occur_mat)
