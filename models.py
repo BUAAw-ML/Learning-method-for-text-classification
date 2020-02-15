@@ -1,4 +1,3 @@
-import torchvision.models as models
 from torch.nn import Parameter
 from util import *
 import torch

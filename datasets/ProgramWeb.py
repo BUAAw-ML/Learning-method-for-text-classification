@@ -1,5 +1,6 @@
 import csv
 import copy
+import os
 
 import torch
 from torch.utils.data import Dataset
@@ -26,7 +27,6 @@ def collate_fn(batch):
 
 class ProgramWebDataset(Dataset):
     def __init__(self, csvfile):
-        self.cfg = cfg
         self.id2tag = {}
         self.tag2id = {}
         self.data = self.load(csvfile)
@@ -41,7 +41,8 @@ class ProgramWebDataset(Dataset):
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             for row in reader:
-                assert len(row) == 4
+                if len(row) != 4:
+                    continue
                 id, title, dscp, tag = row
                 title_tokens = tokenizer.tokenize(title)
                 dscp_tokens = tokenizer.tokenize(dscp)
