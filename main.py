@@ -6,9 +6,10 @@ from dataLoader import *
 
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
-parser.add_argument('data', metavar='DIR',
+parser.add_argument('-data_path', default='data/ProgrammerWeb/programweb-data.csv', metavar='N',
                     help='path to dataset (e.g. data/')
-
+parser.add_argument('-seed', default=0, type=int, metavar='N',
+                    help='random seed')
 parser.add_argument('-num_classes', default=115, type=int, metavar='N',
                     help='number of domains')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
@@ -43,9 +44,12 @@ def main_PW():
     global args, best_prec1, use_gpu
     args = parser.parse_args()
 
-    use_gpu = torch.cuda.is_available()
+    #use_gpu = torch.cuda.is_available()
 
-    train_dataset, val_dataset = CrossValidationSplitter(args.data,  inp_name='data/ProgrammerWeb/train.csv')
+    data, data_block = CrossValidationSplitter(args.data_path, args.seed)
+
+    valData_pos = 9  #take the last part as the val data
+    train_dataset, val_dataset = loadData(data, data_block, valData_pos)
 
     model = gcn_resnet101(num_classes=args.num_classes, t=0.4, adj_file='data/ProgrammerWeb/domainnet.csv')
 
