@@ -48,13 +48,13 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
 
-    dataset = ProgramWebDataset('data/ProgrammerWeb/programweb-data.csv')
+    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
 
-    data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
+    # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 
-    valData_block = 9  # choose a block as validation data
+    # valData_block = 9  # choose a block as validation data
 
-    train_dataset, val_dataset = load_train_val_dataset(dataset, data_block, valData_block)
+    train_dataset, val_dataset = load_train_val_dataset(dataset)
 
     assert 1 == 0
     model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat)
