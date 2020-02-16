@@ -40,13 +40,14 @@ class ProgramWebDataset(Dataset):
         id2tag = {}
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
+            next(reader)
             for row in reader:
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
                 title_tokens = tokenizer.tokenize(title.strip())
                 for token in title_tokens:
-                    if token.start('##'):
+                    if token.startswith('##'):
                         print('-' * 10 + 'title' + '-' * 10)
                         print(title)
                         print('-' * 20)
@@ -54,7 +55,7 @@ class ProgramWebDataset(Dataset):
                         break
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
                 for token in dscp_tokens:
-                    if token.start('##'):
+                    if token.startswith('##'):
                         print('-' * 10 + 'dscp' + '-' * 10)
                         print(dscp)
                         print('-' * 20)
