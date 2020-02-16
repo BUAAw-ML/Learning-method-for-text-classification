@@ -17,6 +17,7 @@ class ProgramWebDataset(Dataset):
         self.tag2id = {}
         self.data = self.load(csvfile)
         self.co_occur_mat = self.stat_cooccurence()
+        torch.save(self.co_occur_mat, './cache/co_occur_mat.cache')
 
     def load(self, f):
         cache_file = 'cache/ProgramWeb.cache'
@@ -53,7 +54,6 @@ class ProgramWebDataset(Dataset):
         torch.save(data, cache_file)
         torch.save(self.tag2id, 'cache/tag2id.cache')
         torch.save(self.id2tag, 'cache/id2tag.cache')
-        torch.save(self.co_occur_mat, 'cache/co_occur_mat.cache')
         return data
 
     def stat_cooccurence(self):
@@ -61,8 +61,8 @@ class ProgramWebDataset(Dataset):
         co_occur_mat = torch.zeros(size=(tags_num, tags_num))
         for i in range(len(self.data)):
             tag_ids = self.data[i]['tag_ids']
-            for t1 in len(tag_ids):
-                for t2 in len(tag_ids):
+            for t1 in range(len(tag_ids)):
+                for t2 in range(len(tag_ids)):
                     co_occur_mat[tag_ids[t1], tag_ids[t2]] += 1
         return co_occur_mat
 
