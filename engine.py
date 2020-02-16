@@ -9,7 +9,8 @@ import torchnet as tnt
 import torch.nn as nn
 from util import *
 
-from datasets.ProgramWeb import ProgramWebDataset
+from dataLoader import ProgramWebDataset
+
 
 tqdm.monitor_interval = 0
 
