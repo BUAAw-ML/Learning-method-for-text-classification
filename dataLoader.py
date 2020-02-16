@@ -54,9 +54,10 @@ class ProgramWebDataset(Dataset):
                 title_ids = tokenizer.convert_tokens_to_ids(title_tokens)
                 dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
                 tag = tag.strip().split('###')
+                tag = [t for t in tag if t != '']
+                if len(tag) == 0:
+                    continue
                 for t in tag:
-                    if t == '':
-                        print(tag, '|||', row)
                     if t not in tag2id:
                         # tag_tokens = tokenizer.tokenize(t)
                         # if np.any([token.startswith('##') for token in tag_tokens]):
@@ -104,6 +105,23 @@ class ProgramWebDataset(Dataset):
     def get_tags_num(self):
         return len(self.tag2id)
 
+    def encode_tag(self):
+        tag_ids = []
+        tag_token_num = []
+        for i in range(self.get_tags_num()):
+            tag = self.id2tag[i]
+            tokens = tokenizer.tokenize(tag)
+            token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            tag_ids.append(token_ids)
+            tag_token_num.append(len(tokens))
+        max_num = max(tag_token_num)
+        padded_tag_ids = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
+        mask = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
+        for i in range(self.get_tags_num()):
+            mask[i, :len(tag_ids[i])] = 1
+            padded_tag_ids[i, :len(tag_ids[i])] = tag_ids[i]
+        return padded_tag_ids, mask
+        
     def collate_fn(self, batch):
         result = {}
         # construct input

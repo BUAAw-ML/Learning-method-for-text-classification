@@ -49,6 +49,7 @@ def multiLabel_text_classify():
     use_gpu = torch.cuda.is_available()
 
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
+    encoded_tag, tag_mask = dataset.encode_tag()
 
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 
@@ -56,7 +57,6 @@ def multiLabel_text_classify():
 
     train_dataset, val_dataset = load_train_val_dataset(dataset)
 
-    assert 1 == 0
     model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat)
 
     # define loss function (criterion)
@@ -75,6 +75,8 @@ def multiLabel_text_classify():
     state['workers'] = args.workers
     state['epoch_step'] = args.epoch_step
     state['lr'] = args.lr
+    state['encoded_tag'] = encoded_tag
+    state['tag_mask'] = tag_mask
     # state['device_ids'] = args.device_ids
     if args.evaluate:
         state['evaluate'] = True

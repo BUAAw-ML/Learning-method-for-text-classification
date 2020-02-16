@@ -103,7 +103,7 @@ class Engine(object):
                     data_time=data_time, loss_current=self.state['loss_batch'], loss=loss))
 
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
-        ids, token_type_ids, attention_mask = self.state['input']
+        input_var = self.state['input']
         target_var = self.state['target']
 
         # compute output
@@ -366,12 +366,14 @@ class MultiLabelMAPEngine(Engine):
 
 class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
-        feature_var = self.state['feature'].float()
         target_var = self.state['target'].float()
-        inp_var = self.state['input'].float().detach()  # one hot
+        ids, token_type_ids, attention_mask = self.state['input']
+        ids = ids.cuda()
+        token_type_ids = token_type_ids.cuda()
+        attention_mask = attention_mask.cuda()
 
         # compute output
-        self.state['output'] = model(feature_var, inp_var)
+        self.state['output'] = model(ids, token_type_ids, attention_mask, self.state['encoded_tag'], self.state['tag_mask'])
         self.state['loss'] = criterion(self.state['output'], target_var)
 
         if training:
@@ -384,11 +386,10 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
     def on_start_batch(self, training, model, criterion, data_loader, optimizer=None, display=True):
 
         self.state['target_gt'] = self.state['target'].clone()
-        self.state['target'][self.state['target'] == 0] = 1
-        self.state['target'][self.state['target'] == -1] = 0
+        # self.state['target'][self.state['target'] == 0] = 1
+        # self.state['target'][self.state['target'] == -1] = 0
 
-        input = self.state['input']
-        self.state['feature'] = input[0]
-        self.state['out'] = input[1]
-        self.state['input'] = input[2]
+        # input = self.state['input']
+        # self.state['feature'] = input[0]
+        # self.state['input'] = input[2]
 
