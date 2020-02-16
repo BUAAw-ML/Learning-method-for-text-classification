@@ -4,8 +4,6 @@ from models import *
 from util import *
 from dataLoader import *
 
-from datasets.ProgramWeb import ProgramWebDataset, split_train_val_dataset
-
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
 # parser.add_argument('data', metavar='DIR',
@@ -13,6 +11,9 @@ parser = argparse.ArgumentParser(description='Training Super-parameters')
 
 # parser.add_argument('-num_classes', default=115, type=int, metavar='N',
 #                     help='number of domains')
+
+parser.add_argument('-seed', default=0, type=int, metavar='N',
+                    help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=20, type=int, metavar='N',
@@ -41,17 +42,22 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 
 
-def main_PW():
+def multiLabel_text_classify():
     global args, best_prec1, use_gpu
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
 
-    # train_dataset, val_dataset = CrossValidationSplitter(args.data,  inp_name='data/ProgrammerWeb/train.csv')
     dataset = ProgramWebDataset('data/ProgrammerWeb/programweb-data.csv')
+
+    data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
+
+    valData_block = 9  # choose a block as validation data
+
+    train_dataset, val_dataset = load_train_val_dataset(dataset, data_block, valData_block)
+
     assert 1 == 0
     model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat)
-    train_dataset, val_dataset = split_train_val_dataset(dataset)
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()
@@ -76,4 +82,4 @@ def main_PW():
     engine.learning(model, criterion, train_dataset, val_dataset, optimizer)
 
 if __name__ == '__main__':
-    main_PW()
+    multiLabel_text_classify()

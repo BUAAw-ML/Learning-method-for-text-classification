@@ -9,7 +9,7 @@ import torchnet as tnt
 import torch.nn as nn
 from util import *
 
-from datasets.ProgramWeb import collate_fn
+from dataLoader import collate_fn
 
 tqdm.monitor_interval = 0
 
