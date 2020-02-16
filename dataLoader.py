@@ -46,25 +46,14 @@ class ProgramWebDataset(Dataset):
                     continue
                 id, title, dscp, tag = row
                 title_tokens = tokenizer.tokenize(title.strip())
-                for token in title_tokens:
-                    if token.startswith('##'):
-                        print('-' * 10 + 'title' + '-' * 10)
-                        print(title)
-                        print('-' * 20)
-                        print(title_tokens)
-                        break
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
-                for token in dscp_tokens:
-                    if token.startswith('##'):
-                        print('-' * 10 + 'dscp' + '-' * 10)
-                        print(dscp)
-                        print('-' * 20)
-                        print(dscp_tokens)
-                        break
                 title_ids = tokenizer.convert_tokens_to_ids(title_tokens)
                 dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
                 tag = tag.strip().split('###')
                 for t in tag:
+                    tag_tokens = tokenizer.tokenize(t)
+                    if np.any([token.startswith('##') for token in tag_tokens]):
+                        print(t, ':', tag_tokens)
                     if t not in tag2id:
                         tag_id = len(tag2id)
                         tag2id[t] = tag_id
