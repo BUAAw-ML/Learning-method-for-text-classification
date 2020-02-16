@@ -9,7 +9,7 @@ import torchnet as tnt
 import torch.nn as nn
 from util import *
 
-from datasets.ProgramWeb import collate_fn
+from datasets.ProgramWeb import ProgramWebDataset
 
 tqdm.monitor_interval = 0
 
@@ -118,11 +118,11 @@ class Engine(object):
         # data loading code
         train_loader = torch.utils.data.DataLoader(train_dataset,
                                                    batch_size=self.state['batch_size'], shuffle=True,
-                                                   num_workers=self.state['workers'], collate_fn=collate_fn)
+                                                   num_workers=self.state['workers'], collate_fn=train_dataset.collate_fn)
 
         val_loader = torch.utils.data.DataLoader(val_dataset,
                                                  batch_size=self.state['batch_size'], shuffle=False,
-                                                 num_workers=self.state['workers'], collate_fn=collate_fn)
+                                                 num_workers=self.state['workers'], collate_fn=val_dataset.collate_fn)
 
         # optionally resume from a checkpoint
         if self._state('resume') is not None:
