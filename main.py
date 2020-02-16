@@ -50,7 +50,7 @@ def multiLabel_text_classify():
 
     dataset = ProgramWebDataset('data/ProgrammerWeb/programweb-data.csv')
 
-    data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
+    data_block = CrossValidationSplitter(dataset, args.seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 
     valData_block = 9  # choose a block as validation data
 
