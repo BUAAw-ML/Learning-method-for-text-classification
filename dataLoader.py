@@ -2,11 +2,13 @@ import csv
 import copy
 import os
 
+from random import shuffle
+
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from transformers import BertTokenizer
 
-from random import shuffle
 
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
