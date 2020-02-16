@@ -12,59 +12,92 @@ tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
 
 class ProgramWebDataset(Dataset):
-    def __init__(self, csvfile):
-        self.id2tag = {}
-        self.tag2id = {}
-        self.data = self.load(csvfile)
-        self.co_occur_mat = self.stat_cooccurence()
-        torch.save(self.co_occur_mat, './cache/co_occur_mat.cache')
+    def __init__(self, data, co_occur_mat, tag2id, id2tag=None):
+        self.data = data
+        self.co_occur_mat = co_occur_mat
+        self.tag2id = tag2id
+        if id2tag is None:
+            id2tag = {v: k for k, v in tag2id.items()}
+        self.id2tag = id2tag
 
-    def load(self, f):
-        cache_file = 'cache/ProgramWeb.cache'
-        if os.path.isfile(cache_file):
-            print('Load cache data: %s' % cache_file)
-            return torch.load(cache_file)
+    @classmethod
+    def from_dict(cls, data_dict):
+        return ProgramWebDataset(data_dict.get('data'),
+            data_dict.get('co_occur_mat'),
+            data_dict.get('tag2id'),
+            data_dict.get('id2tag'))
+
+    @classmethod
+    def from_csv(cls, csvfile):
+        data, tag2id, id2tag = ProgramWebDataset.load(csvfile)
+        co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
+        return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
+
+    @classmethod
+    def load(cls, f):
         data = []
+        tag2id = {}
+        id2tag = {}
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             for row in reader:
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
-                title_tokens = tokenizer.tokenize(title)
-                dscp_tokens = tokenizer.tokenize(dscp)
+                title_tokens = tokenizer.tokenize(title.strip())
+                for token in title_tokens:
+                    if token.start('##'):
+                        print('-' * 10 + 'title' + '-' * 10)
+                        print(title)
+                        print('-' * 20)
+                        print(title_tokens)
+                        break
+                dscp_tokens = tokenizer.tokenize(dscp.strip())
+                for token in dscp_tokens:
+                    if token.start('##'):
+                        print('-' * 10 + 'dscp' + '-' * 10)
+                        print(dscp)
+                        print('-' * 20)
+                        print(dscp_tokens)
+                        break
                 title_ids = tokenizer.convert_tokens_to_ids(title_tokens)
                 dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
-                tag = tag.split('###')
+                tag = tag.strip().split('###')
                 for t in tag:
-                    if t not in self.tag2id:
-                        tag_id = len(self.tag2id)
-                        self.tag2id[t] = tag_id
-                        self.id2tag[tag_id] = t
-                # onehot_tag = torch.zeros(size=(len(self.tag2id),), dtype=torch.long)
-                tag_ids = [self.tag2id[t] for t in tag]
-                # onehot_tag[tag_ids] = 1
+                    if t not in tag2id:
+                        tag_id = len(tag2id)
+                        tag2id[t] = tag_id
+                        id2tag[tag_id] = t
+                tag_ids = [tag2id[t] for t in tag]
                 data.append({
-                    'id': id,
+                    'id': int(id),
                     'title_ids': title_ids,
+                    'title_tokens': title_tokens,
                     'dscp_ids': dscp_ids,
+                    'dscp_tokens': dscp_tokens,
                     'tag_ids': tag_ids,
                 })
         os.makedirs('cache', exist_ok=True)
-        torch.save(data, cache_file)
-        torch.save(self.tag2id, 'cache/tag2id.cache')
-        torch.save(self.id2tag, 'cache/id2tag.cache')
-        return data
+        return data, tag2id, id2tag
 
-    def stat_cooccurence(self):
-        tags_num = self.get_tags_num()
+    @classmethod
+    def stat_cooccurence(cls, data, tags_num):
         co_occur_mat = torch.zeros(size=(tags_num, tags_num))
-        for i in range(len(self.data)):
-            tag_ids = self.data[i]['tag_ids']
+        for i in range(len(data)):
+            tag_ids = data[i]['tag_ids']
             for t1 in range(len(tag_ids)):
                 for t2 in range(len(tag_ids)):
                     co_occur_mat[tag_ids[t1], tag_ids[t2]] += 1
         return co_occur_mat
+
+    def to_dict(self):
+        data_dict = {
+            'data': self.data,
+            'co_occur_mat': self.co_occur_mat,
+            'tag2id': self.tag2id,
+            'id2tag': self.id2tag
+        }
+        return data_dict
 
     def __len__(self):
         return len(self.data)
@@ -81,7 +114,7 @@ class ProgramWebDataset(Dataset):
         inputs = [e['title_ids'] + e['dscp_ids'] for e in batch]
         lengths = np.array([len(e) for e in inputs])
         max_len = np.max(lengths)
-        inputs = [tokenizer.prepare_for_model(e, max_length=max_len, pad_to_max_length=True) for e in inputs]
+        inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
         ids = torch.tensor([e['input_ids'] for e in inputs])
         token_type_ids = torch.tensor([e['token_type_ids'] for e in inputs])
         attention_mask = torch.tensor([e['attention_mask'] for e in inputs])
@@ -92,27 +125,36 @@ class ProgramWebDataset(Dataset):
         return (ids, token_type_ids, attention_mask), tags
 
 
-def CrossValidationSplitter(dataset, seed):
-    data_len = len(dataset.data)  # 获取文件总数
+# def CrossValidationSplitter(dataset, seed):
+#     data_len = len(dataset)  # 获取文件总数
 
-    npr = np.random.RandomState(seed)
+#     npr = np.random.RandomState(seed)
 
-    data_index = npr.permutation(data_len)
+#     data_index = npr.permutation(data_len)
 
-    remainder = data_len % 10
-    data_index = data_index[:-1 * remainder]
-    data_index = np.array(data_index)
-    data_block = data_index.reshape(10, -1)  # split the data into 10 groups
-    return data_block
+#     remainder = data_len % 10
+#     data_index = data_index[:-1 * remainder]
+#     data_index = np.array(data_index)
+#     data_block = data_index.reshape(10, -1)  # split the data into 10 groups
+#     return data_block
 
 
-def load_train_val_dataset(dataset, data_block, valData_block):
+def build_dataset(csvfile=None):
+    if os.path.isfile('cache/ProgramWeb.state'):
+        return ProgramWebDataset.from_dict(
+            torch.load('cache/ProgramWeb.state'))
+    else:
+        dataset = ProgramWebDataset.from_csv(csvfile)
+        torch.save(dataset.to_dict(), 'cache/ProgramWeb.state')
+        return dataset
+
+
+def load_train_val_dataset(dataset):
     data = dataset.data
     train_dataset = dataset
     val_dataset = copy.copy(dataset)
 
-    train_dataset.data = [data[no] for block in range(10) for no in data_block[block] if block != valData_block]
-    val_dataset.data = [data[no] for no in data_block[valData_block]]
-
+    train_dataset.data = data[:-1000]
+    val_dataset.data = data[-1000:]
     return train_dataset, val_dataset
 
