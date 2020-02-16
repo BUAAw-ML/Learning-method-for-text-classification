@@ -51,10 +51,10 @@ class ProgramWebDataset(Dataset):
                 dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
                 tag = tag.strip().split('###')
                 for t in tag:
-                    tag_tokens = tokenizer.tokenize(t)
-                    if np.any([token.startswith('##') for token in tag_tokens]):
-                        print(t, ':', tag_tokens)
                     if t not in tag2id:
+                        tag_tokens = tokenizer.tokenize(t)
+                        if np.any([token.startswith('##') for token in tag_tokens]):
+                            print(t, ':', tag_tokens)
                         tag_id = len(tag2id)
                         tag2id[t] = tag_id
                         id2tag[tag_id] = t
