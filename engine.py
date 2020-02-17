@@ -118,7 +118,7 @@ class Engine(object):
     def learning(self, model, criterion, train_dataset, val_dataset, optimizer=None):
         # data loading code
         train_loader = torch.utils.data.DataLoader(train_dataset,
-                                                   batch_size=self.state['batch_size'], shuffle=True,
+                                                   batch_size=self.state['batch_size'], shuffle=False,
                                                    num_workers=self.state['workers'], collate_fn=train_dataset.collate_fn)
 
         val_loader = torch.utils.data.DataLoader(val_dataset,
@@ -143,8 +143,12 @@ class Engine(object):
             val_loader.pin_memory = True
             cudnn.benchmark = True
 
-            model = torch.nn.DataParallel(model, device_ids=self.state['device_ids']).cuda()
-
+            model = model.cuda(self.state['device_ids'][0])
+            # model = torch.nn.DataParallel(model, device_ids=self.state['device_ids'])
+            if 'encoded_tag' in self.state:
+                self.state['encoded_tag'] = self.state['encoded_tag'].cuda(self.state['device_ids'][0])
+            if 'tag_mask' in self.state:
+                self.state['tag_mask'] = self.state['tag_mask'].cuda(self.state['device_ids'][0])
             criterion = criterion.cuda()
 
         if self.state['evaluate']:
@@ -375,11 +379,10 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
         # compute output
         self.state['output'] = model(ids, token_type_ids, attention_mask, self.state['encoded_tag'], self.state['tag_mask'])
         self.state['loss'] = criterion(self.state['output'], target_var)
-
         if training:
             optimizer.zero_grad()
             self.state['loss'].backward()
-            nn.utils.clip_grad_norm(model.parameters(), max_norm=10.0)
+            nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
             optimizer.step()
 
 

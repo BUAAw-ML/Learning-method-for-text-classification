@@ -50,7 +50,6 @@ def multiLabel_text_classify():
 
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
     encoded_tag, tag_mask = dataset.encode_tag()
-
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 
     # valData_block = 9  # choose a block as validation data
@@ -69,7 +68,7 @@ def multiLabel_text_classify():
                                 weight_decay=args.weight_decay)
 
     state = {'batch_size': args.batch_size, 'max_epochs': args.epochs,
-             'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': args.num_classes}
+             'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': dataset.get_tags_num()}
     state['difficult_examples'] = True
     state['save_model_path'] = 'checkpoint/ProgrammerWeb/'
     state['workers'] = args.workers
@@ -77,7 +76,7 @@ def multiLabel_text_classify():
     state['lr'] = args.lr
     state['encoded_tag'] = encoded_tag
     state['tag_mask'] = tag_mask
-    # state['device_ids'] = args.device_ids
+    state['device_ids'] = args.device_ids
     if args.evaluate:
         state['evaluate'] = True
     engine = GCNMultiLabelMAPEngine(state)
