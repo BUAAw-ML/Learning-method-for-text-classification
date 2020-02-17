@@ -2,14 +2,18 @@ import csv
 import copy
 import os
 
+from random import shuffle
+
+import numpy as np
 import torch
 from torch.utils.data import Dataset
 from transformers import BertTokenizer
 import numpy as np
 
-from random import shuffle
 
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+
+token_table = {'ecommerce': 'electronic commerce'}
 
 
 class ProgramWebDataset(Dataset):
@@ -41,31 +45,24 @@ class ProgramWebDataset(Dataset):
         id2tag = {}
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
+            next(reader)
             for row in reader:
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
                 title_tokens = tokenizer.tokenize(title.strip())
-                for token in title_tokens:
-                    if token.start('##'):
-                        print('-' * 10 + 'title' + '-' * 10)
-                        print(title)
-                        print('-' * 20)
-                        print(title_tokens)
-                        break
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
-                for token in dscp_tokens:
-                    if token.start('##'):
-                        print('-' * 10 + 'dscp' + '-' * 10)
-                        print(dscp)
-                        print('-' * 20)
-                        print(dscp_tokens)
-                        break
                 title_ids = tokenizer.convert_tokens_to_ids(title_tokens)
                 dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
                 tag = tag.strip().split('###')
+                tag = [t for t in tag if t != '']
+                if len(tag) == 0:
+                    continue
                 for t in tag:
                     if t not in tag2id:
+                        # tag_tokens = tokenizer.tokenize(t)
+                        # if np.any([token.startswith('##') for token in tag_tokens]):
+                        #     print(t, ':', tag_tokens)
                         tag_id = len(tag2id)
                         tag2id[t] = tag_id
                         id2tag[tag_id] = t
@@ -109,6 +106,23 @@ class ProgramWebDataset(Dataset):
     def get_tags_num(self):
         return len(self.tag2id)
 
+    def encode_tag(self):
+        tag_ids = []
+        tag_token_num = []
+        for i in range(self.get_tags_num()):
+            tag = self.id2tag[i]
+            tokens = tokenizer.tokenize(tag)
+            token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            tag_ids.append(token_ids)
+            tag_token_num.append(len(tokens))
+        max_num = max(tag_token_num)
+        padded_tag_ids = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
+        mask = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
+        for i in range(self.get_tags_num()):
+            mask[i, :len(tag_ids[i])] = 1
+            padded_tag_ids[i, :len(tag_ids[i])] = tag_ids[i]
+        return padded_tag_ids, mask
+        
     def collate_fn(self, batch):
         result = {}
         # construct input

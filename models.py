@@ -55,15 +55,19 @@ class GCNBert(nn.Module):
         _adj = gen_A(num_classes, t, co_occur_mat)
         self.adj = gen_adj(_adj)
 
-    def forward(self, ids, token_type_ids, attention_mask, inp):
+    def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
         token_feat = self.bert(ids,
             token_type_ids=token_type_ids,
             attention_mask=attention_mask)[0]
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
-            / torch.sum(attention_mask, dim=1, )
+            / torch.sum(attention_mask, dim=1, keepdim=True)
         
-        inp = inp[0]
-        x = self.gc1(inp, self.adj)
+        embed = self.bert.get_input_embedding()
+        tag_embedding = embed(encoded_tag)
+        tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
+            / torch.sum(tag_mask, dim=1, keepdim=True)
+
+        x = self.gc1(tag_embedding, self.adj)
         x = self.relu(x)
         x = self.gc2(x, self.adj)
 
