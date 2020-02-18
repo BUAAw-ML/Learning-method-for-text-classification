@@ -42,18 +42,21 @@ class GraphConvolution(nn.Module):
 
 class GCNBert(nn.Module):
     def __init__(self, bert, num_classes, t=0, co_occur_mat=None):
-        super(GCNResnet, self).__init__()
+        super(GCNBert, self).__init__()
         
-        self.bert = bert
+        self.add_module('bert', bert)
+        for m in self.bert.parameters():
+            m.requires_grad = False
         
         self.num_classes = num_classes
 
-        self.gc1 = GraphConvolution(768, 1024)
-        self.gc2 = GraphConvolution(1024, 2048)
+        self.gc1 = GraphConvolution(768, 768)
+        self.gc2 = GraphConvolution(768, 768)
         self.relu = nn.LeakyReLU(0.2)
 
         _adj = gen_A(num_classes, t, co_occur_mat)
-        self.adj = gen_adj(_adj)
+        _adj = torch.FloatTensor(_adj)
+        self.adj = nn.Parameter(gen_adj(_adj), requires_grad=False)
 
     def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
         token_feat = self.bert(ids,
@@ -62,11 +65,10 @@ class GCNBert(nn.Module):
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
             / torch.sum(attention_mask, dim=1, keepdim=True)
         
-        embed = self.bert.get_input_embedding()
+        embed = self.bert.get_input_embeddings()
         tag_embedding = embed(encoded_tag)
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
             / torch.sum(tag_mask, dim=1, keepdim=True)
-
         x = self.gc1(tag_embedding, self.adj)
         x = self.relu(x)
         x = self.gc2(x, self.adj)

@@ -117,10 +117,10 @@ class ProgramWebDataset(Dataset):
             tag_token_num.append(len(tokens))
         max_num = max(tag_token_num)
         padded_tag_ids = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
-        mask = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
+        mask = torch.zeros((self.get_tags_num(), max_num))
         for i in range(self.get_tags_num()):
-            mask[i, :len(tag_ids[i])] = 1
-            padded_tag_ids[i, :len(tag_ids[i])] = tag_ids[i]
+            mask[i, :len(tag_ids[i])] = 1.
+            padded_tag_ids[i, :len(tag_ids[i])] = torch.tensor(tag_ids[i])
         return padded_tag_ids, mask
         
     def collate_fn(self, batch):
@@ -130,13 +130,14 @@ class ProgramWebDataset(Dataset):
         lengths = np.array([len(e) for e in inputs])
         max_len = np.max(lengths)
         inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
-        ids = torch.tensor([e['input_ids'] for e in inputs])
-        token_type_ids = torch.tensor([e['token_type_ids'] for e in inputs])
-        attention_mask = torch.tensor([e['attention_mask'] for e in inputs])
+        ids = torch.LongTensor([e['input_ids'] for e in inputs])
+        token_type_ids = torch.LongTensor([e['token_type_ids'] for e in inputs])
+        attention_mask = torch.FloatTensor([e['attention_mask'] for e in inputs])
         # construct tag
         tags = torch.zeros(size=(len(batch), self.get_tags_num()), dtype=torch.long)
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1
+        print(ids.shape, token_type_ids.shape, attention_mask.shape, tags.shape)
         return (ids, token_type_ids, attention_mask), tags
 
 
