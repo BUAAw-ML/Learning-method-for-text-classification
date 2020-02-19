@@ -160,8 +160,7 @@ class AveragePrecisionMeter(object):
             total_count += 1
             if label == 1:
                 precision_at_i += pos_count / total_count
-        precision_at_i /= pos_count
-        return precision_at_i
+        return 0. if pos_count == 0. else precision_at_i / pos_count
 
     def overall(self):
         if self.scores.numel() == 0:

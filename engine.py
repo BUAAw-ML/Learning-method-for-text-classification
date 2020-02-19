@@ -2,7 +2,6 @@ import os
 import shutil
 import time
 import torch.backends.cudnn as cudnn
-import torch.nn.parallel
 import torch.optim
 import torch.utils.data
 import torchnet as tnt
@@ -139,9 +138,9 @@ class Engine(object):
                 print("=> no checkpoint found at '{}'".format(self.state['resume']))
 
         if self.state['use_gpu']:
-            train_loader.pin_memory = True
-            val_loader.pin_memory = True
-            cudnn.benchmark = True
+            # train_loader.pin_memory = True
+            # val_loader.pin_memory = True
+            # cudnn.benchmark = True
 
             model = model.cuda(self.state['device_ids'][0])
             # model = torch.nn.DataParallel(model, device_ids=self.state['device_ids'])
@@ -217,7 +216,6 @@ class Engine(object):
         self.on_end_epoch(True, model, criterion, data_loader, optimizer)
 
     def validate(self, data_loader, model, criterion):
-
         # switch to evaluate mode
         model.eval()
 
@@ -346,7 +344,6 @@ class MultiLabelMAPEngine(Engine):
         self.state['ap_meter'].add(self.state['output'].data.cpu(), self.state['target_gt'].cpu())
 
         if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
-            assert 1 == 0
             loss = self.state['meter_loss'].value()[0]
             batch_time = self.state['batch_time'].value()[0]
             data_time = self.state['data_time'].value()[0]

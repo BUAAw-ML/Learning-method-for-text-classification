@@ -136,7 +136,6 @@ class ProgramWebDataset(Dataset):
         tags = torch.zeros(size=(len(batch), self.get_tags_num()), dtype=torch.long)
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1
-        print(ids.shape, token_type_ids.shape, attention_mask.shape, tags.shape)
         return (ids, token_type_ids, attention_mask), tags
 
 

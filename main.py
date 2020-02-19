@@ -77,6 +77,7 @@ def multiLabel_text_classify():
     state['encoded_tag'] = encoded_tag
     state['tag_mask'] = tag_mask
     state['device_ids'] = args.device_ids
+    state['print_freq'] = args.print_freq
     if args.evaluate:
         state['evaluate'] = True
     engine = GCNMultiLabelMAPEngine(state)
