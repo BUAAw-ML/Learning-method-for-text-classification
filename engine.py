@@ -50,6 +50,8 @@ class Engine(object):
             self.state['use_pb'] = True
         if self._state('print_freq') is None:
             self.state['print_freq'] = 0
+        # best score
+        self.state['best_score'] = 0.
 
     def _state(self, name):
         if name in self.state:
@@ -172,7 +174,7 @@ class Engine(object):
             self.save_checkpoint({
                 'epoch': epoch + 1,
                 'arch': self._state('arch'),
-                'state_dict': model.module.state_dict() if self.state['use_gpu'] else model.state_dict(),
+                'state_dict': model.state_dict() if self.state['use_gpu'] else model.state_dict(),
                 'best_score': self.state['best_score'],
             }, is_best)
 
@@ -202,7 +204,7 @@ class Engine(object):
             self.on_start_batch(True, model, criterion, data_loader, optimizer)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].float().cuda()
+                self.state['target'] = self.state['target'].cuda()
 
             self.on_forward(True, model, criterion, data_loader, optimizer)
 

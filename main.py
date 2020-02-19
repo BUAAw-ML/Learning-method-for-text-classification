@@ -49,6 +49,13 @@ def multiLabel_text_classify():
     use_gpu = torch.cuda.is_available()
 
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
+    dataset.data[1450] = dataset.data[0]
+    dataset.data[4560] = dataset.data[0]
+    dataset.data[8744] = dataset.data[0]
+    dataset.data[1333] = dataset.data[0]
+    dataset.data[10733] = dataset.data[0]
+    dataset.data[5590] = dataset.data[0]
+
     encoded_tag, tag_mask = dataset.encode_tag()
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 

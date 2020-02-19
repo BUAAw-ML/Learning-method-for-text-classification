@@ -133,9 +133,9 @@ class ProgramWebDataset(Dataset):
         token_type_ids = torch.LongTensor([e['token_type_ids'] for e in inputs])
         attention_mask = torch.FloatTensor([e['attention_mask'] for e in inputs])
         # construct tag
-        tags = torch.zeros(size=(len(batch), self.get_tags_num()), dtype=torch.long)
+        tags = torch.zeros(size=(len(batch), self.get_tags_num()))
         for i in range(len(batch)):
-            tags[i, batch[i]['tag_ids']] = 1
+            tags[i, batch[i]['tag_ids']] = 1.
         return (ids, token_type_ids, attention_mask), tags
 
 
