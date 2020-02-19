@@ -203,7 +203,7 @@ class Engine(object):
             self.on_start_batch(True, model, criterion, data_loader, optimizer)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda()
+                self.state['target'] = self.state['target'].float().cuda()
 
             self.on_forward(True, model, criterion, data_loader, optimizer)
 
@@ -343,9 +343,10 @@ class MultiLabelMAPEngine(Engine):
         Engine.on_end_batch(self, training, model, criterion, data_loader, optimizer, display=False)
 
         # measure mAP
-        self.state['ap_meter'].add(self.state['output'].data, self.state['target_gt'])
+        self.state['ap_meter'].add(self.state['output'].data.cpu(), self.state['target_gt'].cpu())
 
         if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
+            assert 1 == 0
             loss = self.state['meter_loss'].value()[0]
             batch_time = self.state['batch_time'].value()[0]
             data_time = self.state['data_time'].value()[0]
@@ -370,7 +371,7 @@ class MultiLabelMAPEngine(Engine):
 
 class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
-        target_var = self.state['target'].float()
+        target_var = self.state['target']
         ids, token_type_ids, attention_mask = self.state['input']
         ids = ids.cuda()
         token_type_ids = token_type_ids.cuda()
