@@ -91,4 +91,7 @@ def multiLabel_text_classify():
     engine.learning(model, criterion, train_dataset, val_dataset, optimizer)
 
 if __name__ == '__main__':
+
+    print("hahaha")
+    exit()
     multiLabel_text_classify()
