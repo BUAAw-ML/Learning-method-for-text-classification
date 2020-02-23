@@ -94,7 +94,7 @@ class ProgramWebDataset(Dataset):
                 tag1 = tag1.strip()
                 tag2 = tag2.strip()
 
-                co_occur_mat[tag2id[tag1], tag2id[tag2]] += similar
+                co_occur_mat[tag2id[tag1], tag2id[tag2]] += float(similar)
 
         return co_occur_mat
 
