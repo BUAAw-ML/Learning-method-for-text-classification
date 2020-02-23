@@ -48,7 +48,7 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
 
-    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
+    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
     dataset.data[1450] = dataset.data[0]
     dataset.data[4560] = dataset.data[0]
     dataset.data[8744] = dataset.data[0]
@@ -92,6 +92,4 @@ def multiLabel_text_classify():
 
 if __name__ == '__main__':
 
-    print("hahaha")
-    exit()
     multiLabel_text_classify()

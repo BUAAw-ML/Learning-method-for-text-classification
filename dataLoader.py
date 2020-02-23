@@ -32,9 +32,9 @@ class ProgramWebDataset(Dataset):
             data_dict.get('id2tag'))
 
     @classmethod
-    def from_csv(cls, csvfile):
-        data, tag2id, id2tag = ProgramWebDataset.load(csvfile)
-        co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
+    def from_csv(cls, api_csvfile, net_csvfile):
+        data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile)
+        co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
@@ -78,13 +78,24 @@ class ProgramWebDataset(Dataset):
         return data, tag2id, id2tag
 
     @classmethod
-    def stat_cooccurence(cls, data, tags_num):
+    def similar_net(cls, csvfile, tag2id):
+
+        tags_num = len(tag2id)
         co_occur_mat = torch.zeros(size=(tags_num, tags_num))
-        for i in range(len(data)):
-            tag_ids = data[i]['tag_ids']
-            for t1 in range(len(tag_ids)):
-                for t2 in range(len(tag_ids)):
-                    co_occur_mat[tag_ids[t1], tag_ids[t2]] += 1
+
+        with open(csvfile, newline='') as f:
+            reader = csv.reader(f, delimiter=',')
+            next(reader)
+            for row in reader:
+                if len(row) != 3:
+                    continue
+                tag1, similar, tag2 = row
+
+                tag1 = tag1.strip()
+                tag2 = tag2.strip()
+
+                co_occur_mat[tag2id[tag1], tag2id[tag2]] += similar
+
         return co_occur_mat
 
     def to_dict(self):
@@ -153,12 +164,12 @@ class ProgramWebDataset(Dataset):
 #     return data_block
 
 
-def build_dataset(csvfile=None):
+def build_dataset(api_csvfile=None, net_csvfile=None):
     if os.path.isfile('cache/ProgramWeb.state'):
         return ProgramWebDataset.from_dict(
             torch.load('cache/ProgramWeb.state'))
     else:
-        dataset = ProgramWebDataset.from_csv(csvfile)
+        dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile)
         torch.save(dataset.to_dict(), 'cache/ProgramWeb.state')
         return dataset
 
