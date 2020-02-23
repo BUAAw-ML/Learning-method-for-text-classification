@@ -46,7 +46,7 @@ def multiLabel_text_classify():
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
-    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv','data/ProgrammerWeb/tagnet.csv')
+    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv','data/ProgrammerWeb/domainnet.csv')
     # dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
     #                         os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
 
