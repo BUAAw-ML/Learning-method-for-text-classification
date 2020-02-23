@@ -35,8 +35,6 @@ class ProgramWebDataset(Dataset):
     def from_csv(cls, api_csvfile, net_csvfile):
         data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile)
         co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
-        print(co_occur_mat)
-        print(len(co_occur_mat))
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
@@ -167,7 +165,7 @@ class ProgramWebDataset(Dataset):
 
 
 def build_dataset(api_csvfile=None, net_csvfile=None):
-    if os.path.isfile('cache/ProgramWeb.state'):
+    if os.path.isfile('cache/ProgramWeb.state') and False:
         return ProgramWebDataset.from_dict(
             torch.load('cache/ProgramWeb.state'))
     else:
