@@ -6,9 +6,9 @@ from dataLoader import *
 
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
-
-parser.add_argument('data_path', default='data/ProgrammerWeb/', type=str,
-                    help='path to dataset (e.g. data/')
+#
+# parser.add_argument('data_path', default='data/ProgrammerWeb/', type=str,
+#                     help='path to dataset (e.g. data/')
 # parser.add_argument('-num_classes', default=115, type=int, metavar='N',
 #                     help='number of domains')
 parser.add_argument('-seed', default=0, type=int, metavar='N',
@@ -47,8 +47,8 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
 
-    dataset = build_dataset(os.path.join(args.data_path, 'programweb-data.csv'),
-                            os.path.join(args.data_path, 'tagnet.csv'))
+    dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
+                            os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
 
     dataset.data[1450] = dataset.data[0]
     dataset.data[4560] = dataset.data[0]
