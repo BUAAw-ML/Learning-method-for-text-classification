@@ -35,6 +35,8 @@ class ProgramWebDataset(Dataset):
     def from_csv(cls, api_csvfile, net_csvfile):
         data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile)
         co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
+        print(co_occur_mat)
+        print(len(co_occur_mat))
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
