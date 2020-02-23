@@ -7,7 +7,7 @@ from dataLoader import *
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
 
-parser.add_argument('data_path', default='data/ProgrammerWeb/', metavar='DIR',
+parser.add_argument('data_path', default='data/ProgrammerWeb/', type=str,
                     help='path to dataset (e.g. data/')
 # parser.add_argument('-num_classes', default=115, type=int, metavar='N',
 #                     help='number of domains')
