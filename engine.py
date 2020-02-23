@@ -47,7 +47,7 @@ class Engine(object):
         self.state['data_time'] = tnt.meter.AverageValueMeter()
         # display parameters
         if self._state('use_pb') is None:
-            self.state['use_pb'] = True
+            self.state['use_pb'] = False
         if self._state('print_freq') is None:
             self.state['print_freq'] = 0
         # best score
