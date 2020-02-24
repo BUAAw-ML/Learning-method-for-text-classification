@@ -40,6 +40,10 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
+parser.add_argument('--save_model_path', default='./checkpoint', type=str,
+                    help='path to save checkpoint (default: none)')
+parser.add_argument('--log_dir', default='./logs', type=str,
+                    help='path to save log (default: none)')
 
 
 def multiLabel_text_classify():
@@ -55,13 +59,16 @@ def multiLabel_text_classify():
     dataset.data[1333] = dataset.data[0]
     dataset.data[10733] = dataset.data[0]
     dataset.data[5590] = dataset.data[0]
+    
+    train_dataset, val_dataset = ProgramWebDataset.from_dict(
+        torch.load('cache/programweb.train')), ProgramWebDataset.from_dict(
+        torch.load('cache/programweb.eval'))
 
     encoded_tag, tag_mask = dataset.encode_tag()
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 
     # valData_block = 9  # choose a block as validation data
 
-    train_dataset, val_dataset = load_train_val_dataset(dataset)
 
     model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat)
 
@@ -76,8 +83,9 @@ def multiLabel_text_classify():
 
     state = {'batch_size': args.batch_size, 'max_epochs': args.epochs,
              'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': dataset.get_tags_num()}
-    state['difficult_examples'] = True
-    state['save_model_path'] = 'checkpoint/ProgrammerWeb/'
+    state['difficult_examples'] = False
+    state['save_model_path'] = args.save_model_path
+    state['log_dir'] = args.log_dir
     state['workers'] = args.workers
     state['epoch_step'] = args.epoch_step
     state['lr'] = args.lr
