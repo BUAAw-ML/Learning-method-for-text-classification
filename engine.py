@@ -168,7 +168,7 @@ class Engine(object):
             # train for one epoch
             self.train(train_loader, model, criterion, optimizer, epoch)
 
-            if epoch % 5 == 4:
+            if epoch % 10 == 9:
                 # evaluate on validation set
                 prec1 = self.validate(val_loader, model, criterion)
 

@@ -15,7 +15,7 @@ parser.add_argument('-seed', default=0, type=int, metavar='N',
                     help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=5, type=int, metavar='N',
+parser.add_argument('--epochs', default=10, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--epoch_step', default=[30], type=int, nargs='+',
                     help='number of epochs to change learning rate')
@@ -46,7 +46,7 @@ def multiLabel_text_classify():
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
-    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv','data/ProgrammerWeb/domainnet.csv')
+    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
     # dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
     #                         os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
 
@@ -88,6 +88,9 @@ def multiLabel_text_classify():
     state['print_freq'] = args.print_freq
 
     state['id2tag'] = dataset.id2tag
+
+
+
     if args.evaluate:
         state['evaluate'] = True
     engine = GCNMultiLabelMAPEngine(state)
