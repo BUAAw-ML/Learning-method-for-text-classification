@@ -203,18 +203,27 @@ class AveragePrecisionMeter(object):
         CF1 = (2 * CP * CR) / (CP + CR)
         return OP, OR, OF1, CP, CR, CF1
 
+# def gen_A(num_classes, t, co_occur_mat):
+#     import pickle
+#     _adj = co_occur_mat.numpy()
+#     _nums = _adj.diagonal()
+#     _nums = _nums[:, np.newaxis]
+#     _adj = _adj / _nums
+#     _adj[_adj < t] = 0
+#     _adj[_adj >= t] = 1
+#     _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
+#     _adj = _adj + np.identity(num_classes, np.int)
+#     return _adj
+
 def gen_A(num_classes, t, co_occur_mat):
     import pickle
     _adj = co_occur_mat.numpy()
-    print(_adj)
-    _nums = _adj.diagonal()
-    print(_nums)
-    exit()
-    _nums = _nums[:, np.newaxis]
-    _adj = _adj / _nums
-    _adj[_adj < t] = 0
-    _adj[_adj >= t] = 1
-    _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
+    # _nums = _adj.diagonal()
+    # _nums = _nums[:, np.newaxis]
+    # _adj = _adj / _nums
+    # _adj[_adj < t] = 0
+    # _adj[_adj >= t] = 1
+    # _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
     _adj = _adj + np.identity(num_classes, np.int)
     return _adj
 
