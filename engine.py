@@ -10,6 +10,8 @@ from util import *
 
 from dataLoader import ProgramWebDataset
 
+import json
+
 
 tqdm.monitor_interval = 0
 
@@ -241,7 +243,9 @@ class Engine(object):
             if self.state['use_gpu']:
                 self.state['target'] = self.state['target'].cuda()
 
-            self.on_forward(False, model, criterion, data_loader)
+            output = self.on_forward(False, model, criterion, data_loader)
+
+            self.recordResult(target, output)
 
             # measure elapsed time
             self.state['batch_time_current'] = time.time() - end
@@ -253,6 +257,21 @@ class Engine(object):
         score = self.on_end_epoch(False, model, criterion, data_loader)
 
         return score
+
+    def recordResult(self, target, output):
+        result = []
+        for i in range(len(target)):
+            buf = []
+            buf.append(
+            [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1]
+            )
+            buf.append(
+            self.state['id2tag'][sorted(range(len(output[i])), key=lambda k: output[i][k])[:10]]
+            )
+            result.append(buf)
+
+        with open('testResult.json', 'a') as f:
+            json.dump(result, f)
 
     def save_checkpoint(self, state, is_best, filename='checkpoint.pth.tar'):
         if self._state('save_model_path') is not None:
@@ -384,6 +403,8 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
             self.state['loss'].backward()
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
             optimizer.step()
+        else:
+            return self.state['output']
 
 
     def on_start_batch(self, training, model, criterion, data_loader, optimizer=None, display=True):
