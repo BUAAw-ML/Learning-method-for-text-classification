@@ -34,7 +34,8 @@ class ProgramWebDataset(Dataset):
     @classmethod
     def from_csv(cls, api_csvfile, net_csvfile):
         data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile)
-        co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
+        co_occur_mat = ProgramWebDataset.stat_cooccurence(net_csvfile, len(tag2id))
+        #co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
@@ -76,6 +77,16 @@ class ProgramWebDataset(Dataset):
                 })
         os.makedirs('cache', exist_ok=True)
         return data, tag2id, id2tag
+
+    @classmethod
+    def stat_cooccurence(cls, data, tags_num):
+        co_occur_mat = torch.zeros(size=(tags_num, tags_num))
+        for i in range(len(data)):
+            tag_ids = data[i]['tag_ids']
+            for t1 in range(len(tag_ids)):
+                for t2 in range(len(tag_ids)):
+                    co_occur_mat[tag_ids[t1], tag_ids[t2]] += 1
+        return co_occur_mat
 
     @classmethod
     def similar_net(cls, csvfile, tag2id):
