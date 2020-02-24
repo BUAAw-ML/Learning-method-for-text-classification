@@ -179,6 +179,6 @@ def load_train_val_dataset(dataset):
     val_dataset = copy.copy(dataset)
 
     train_dataset.data = data[:-1000]
-    val_dataset.data = data[:-8000]
+    val_dataset.data = data[-1000:]
     return train_dataset, val_dataset
 
