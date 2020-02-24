@@ -266,7 +266,7 @@ class Engine(object):
             [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1]
             )
             buf.append(
-            [self.state['id2tag'][index] for index in [sorted(range(len(output[i])), key=lambda k: output[i][k])]]
+            [self.state['id2tag'][index] for index in sorted(range(len(output[i])), key=lambda k: output[i][k])[:10]]
             )
             result.append(buf)
 
