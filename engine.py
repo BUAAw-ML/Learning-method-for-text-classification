@@ -168,21 +168,21 @@ class Engine(object):
             # train for one epoch
             self.train(train_loader, model, criterion, optimizer, epoch)
 
-            if epoch % 10 == 9:
-                # evaluate on validation set
-                prec1 = self.validate(val_loader, model, criterion)
 
-                # remember best prec@1 and save checkpoint
-                is_best = prec1 > self.state['best_score']
-                self.state['best_score'] = max(prec1, self.state['best_score'])
-                self.save_checkpoint({
-                    'epoch': epoch + 1,
-                    'arch': self._state('arch'),
-                    'state_dict': model.state_dict() if self.state['use_gpu'] else model.state_dict(),
-                    'best_score': self.state['best_score'],
-                }, is_best)
+            # evaluate on validation set
+            prec1 = self.validate(val_loader, model, criterion, epoch)
 
-                print(' *** best={best:.3f}'.format(best=self.state['best_score']))
+            # remember best prec@1 and save checkpoint
+            is_best = prec1 > self.state['best_score']
+            self.state['best_score'] = max(prec1, self.state['best_score'])
+            self.save_checkpoint({
+                'epoch': epoch + 1,
+                'arch': self._state('arch'),
+                'state_dict': model.state_dict() if self.state['use_gpu'] else model.state_dict(),
+                'best_score': self.state['best_score'],
+            }, is_best)
+
+            print(' *** best={best:.3f}'.format(best=self.state['best_score']))
         return self.state['best_score']
 
     def train(self, data_loader, model, criterion, optimizer, epoch):
@@ -221,7 +221,7 @@ class Engine(object):
 
         self.on_end_epoch(True, model, criterion, data_loader, optimizer)
 
-    def validate(self, data_loader, model, criterion):
+    def validate(self, data_loader, model, criterion, epoch):
         # switch to evaluate mode
         model.eval()
 
@@ -247,7 +247,8 @@ class Engine(object):
 
             output = self.on_forward(False, model, criterion, data_loader)
 
-            self.recordResult(target, output)
+            if epoch == self.state['max_epochs'] - 1:
+                self.recordResult(target, output)
 
             # measure elapsed time
             self.state['batch_time_current'] = time.time() - end
