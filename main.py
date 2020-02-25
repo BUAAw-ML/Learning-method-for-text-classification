@@ -77,7 +77,7 @@ def multiLabel_text_classify():
 
     state = {'batch_size': args.batch_size, 'max_epochs': args.epochs,
              'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': dataset.get_tags_num()}
-    state['difficult_examples'] = True
+    state['difficult_examples'] = False
     state['save_model_path'] = 'checkpoint/ProgrammerWeb/'
     state['workers'] = args.workers
     state['epoch_step'] = args.epoch_step
