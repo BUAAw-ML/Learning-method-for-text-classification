@@ -151,7 +151,8 @@ class ProgramWebDataset(Dataset):
     def collate_fn(self, batch):
         result = {}
         # construct input
-        inputs = [e['title_ids'] + e['dscp_ids'] for e in batch]
+        #inputs = [e['title_ids'] + e['dscp_ids'] for e in batch]
+        inputs = [e['dscp_ids'] for e in batch]
         lengths = np.array([len(e) for e in inputs])
         max_len = np.max(lengths)
         inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
