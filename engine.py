@@ -196,7 +196,7 @@ class Engine(object):
             data_loader = tqdm(data_loader, desc='Training')
 
         end = time.time()
-        for i, (input, target) in enumerate(data_loader):
+        for i, (input, target, _) in enumerate(data_loader):
             # measure data loading time
             self.state['iteration'] = i
             self.state['data_time_batch'] = time.time() - end
