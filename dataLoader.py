@@ -102,15 +102,15 @@ class ProgramWebDataset(Dataset):
                     continue
                 tag1, similar, tag2 = row
 
-                if tag1 not in tag2id or tag2 not in tag2id:
-                    i += 1
-                    continue
+                # if tag1 not in tag2id or tag2 not in tag2id:
+                #     i += 1
+                #     continue
 
                 tag1 = tag1.strip()
                 tag2 = tag2.strip()
 
                 co_occur_mat[tag2id[tag1], tag2id[tag2]] += float(similar)
-        print(i)
+
         return co_occur_mat
 
     def to_dict(self):
