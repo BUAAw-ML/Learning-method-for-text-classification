@@ -99,11 +99,11 @@ class ProgramWebDataset(Dataset):
             next(reader)
             for row in reader:
                 if len(row) != 3:
-                    i += 1
                     continue
                 tag1, similar, tag2 = row
 
                 if tag1 not in tag2id or tag2 not in tag2id:
+                    i += 1
                     continue
 
                 tag1 = tag1.strip()
