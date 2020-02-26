@@ -231,7 +231,7 @@ class Engine(object):
             data_loader = tqdm(data_loader, desc='Test')
 
         end = time.time()
-        for i, (input, target) in enumerate(data_loader):
+        for i, (input, target, self.state['dscp']) in enumerate(data_loader):
             # measure data loading time
             self.state['iteration'] = i
             self.state['data_time_batch'] = time.time() - end
@@ -265,6 +265,7 @@ class Engine(object):
         result = []
         for i in range(len(target)):
             buf = []
+            buf.append(self.state['dscp'])
             buf.append(
             [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1]
             )

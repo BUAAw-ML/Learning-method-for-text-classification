@@ -74,6 +74,7 @@ class ProgramWebDataset(Dataset):
                     'dscp_ids': dscp_ids,
                     'dscp_tokens': dscp_tokens,
                     'tag_ids': tag_ids,
+                    'dscp': dscp
                 })
         os.makedirs('cache', exist_ok=True)
         return data, tag2id, id2tag
@@ -163,7 +164,8 @@ class ProgramWebDataset(Dataset):
         tags = torch.zeros(size=(len(batch), self.get_tags_num()))
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1.
-        return (ids, token_type_ids, attention_mask), tags
+        dscp = [e['dscp'] for e in batch]
+        return (ids, token_type_ids, attention_mask), tags, dscp
 
 
 # def CrossValidationSplitter(dataset, seed):
