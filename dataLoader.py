@@ -93,12 +93,13 @@ class ProgramWebDataset(Dataset):
 
         tags_num = len(tag2id)
         co_occur_mat = torch.zeros(size=(tags_num, tags_num))
-
+        i = 0
         with open(csvfile, newline='') as f:
             reader = csv.reader(f, delimiter=',')
             next(reader)
             for row in reader:
                 if len(row) != 3:
+                    i += 1
                     continue
                 tag1, similar, tag2 = row
 
@@ -109,7 +110,7 @@ class ProgramWebDataset(Dataset):
                 tag2 = tag2.strip()
 
                 co_occur_mat[tag2id[tag1], tag2id[tag2]] += float(similar)
-
+        print(i)
         return co_occur_mat
 
     def to_dict(self):
