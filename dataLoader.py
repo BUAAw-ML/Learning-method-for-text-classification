@@ -211,7 +211,7 @@ def load_train_val_dataset(dataset):
     # train_dataset.data = data[:-1000]
     # val_dataset.data = data[-1000:]
 
-    train_dataset.data = data[data_index[:-1000]]
-    val_dataset.data = data[data_index[-1000:]]
+    train_dataset.data = [data[i] for i in data_index[:-1000]]
+    val_dataset.data = [data[i] for i in data_index[-1000:]]
     return train_dataset, val_dataset
 
