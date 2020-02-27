@@ -196,6 +196,8 @@ class AveragePrecisionMeter(object):
             Np[k] = np.sum(scores >= 0)
             Nc[k] = np.sum(targets * (scores >= 0))
         Np[Np == 0] = 1
+
+
         OP = np.sum(Nc) / np.sum(Np)
         OR = np.sum(Nc) / np.sum(Ng)
         OF1 = (2 * OP * OR) / (OP + OR)

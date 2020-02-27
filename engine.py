@@ -265,7 +265,7 @@ class Engine(object):
         result = []
         for i in range(len(target)):
             buf = []
-            buf.append(self.state['dscp'])
+            buf.append(self.state['dscp'][i])
             buf.append(
             [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1]
             )
