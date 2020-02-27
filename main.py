@@ -15,7 +15,7 @@ parser.add_argument('-seed', default=0, type=int, metavar='N',
                     help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=40, type=int, metavar='N',
+parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--epoch_step', default=[30], type=int, nargs='+',
                     help='number of epochs to change learning rate')
@@ -46,16 +46,16 @@ def multiLabel_text_classify():
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
-    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
+    dataset = build_dataset('data/ProgrammerWeb/programweb-data-tag.csv', 'data/ProgrammerWeb/tagnet.csv')
     # dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
     #                         os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
 
-    dataset.data[1450] = dataset.data[0]
-    dataset.data[4560] = dataset.data[0]
-    dataset.data[8744] = dataset.data[0]
-    dataset.data[1333] = dataset.data[0]
-    dataset.data[10733] = dataset.data[0]
-    dataset.data[5590] = dataset.data[0]
+    # dataset.data[1450] = dataset.data[0]
+    # dataset.data[4560] = dataset.data[0]
+    # dataset.data[8744] = dataset.data[0]
+    # dataset.data[1333] = dataset.data[0]
+    # dataset.data[10733] = dataset.data[0]
+    # dataset.data[5590] = dataset.data[0]
 
     encoded_tag, tag_mask = dataset.encode_tag()
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
