@@ -16,15 +16,15 @@ parser.add_argument('-seed', default=0, type=int, metavar='N',
                     help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=20, type=int, metavar='N',
+parser.add_argument('--epochs', default=100, type=int, metavar='N',
                     help='number of total epochs to run')
-parser.add_argument('--epoch_step', default=[30], type=int, nargs='+',
+parser.add_argument('--epoch_step', default=[60, 80], type=int, nargs='+',
                     help='number of epochs to change learning rate')
-parser.add_argument('--device_ids', default=[0], type=int, nargs='+',
+parser.add_argument('--device_ids', default=[1], type=int, nargs='+',
                     help='')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=16, type=int,
+parser.add_argument('-b', '--batch-size', default=32, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
@@ -53,16 +53,13 @@ def multiLabel_text_classify():
     use_gpu = torch.cuda.is_available()
 
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
-    dataset.data[1450] = dataset.data[0]
-    dataset.data[4560] = dataset.data[0]
-    dataset.data[8744] = dataset.data[0]
-    dataset.data[1333] = dataset.data[0]
-    dataset.data[10733] = dataset.data[0]
-    dataset.data[5590] = dataset.data[0]
+    # train_dataset, val_dataset = load_train_val_dataset(dataset)
+    # torch.save(train_dataset.to_dict(), './cache2/programweb.train')
+    # torch.save(val_dataset.to_dict(), './cache2/programweb.eval')
     
     train_dataset, val_dataset = ProgramWebDataset.from_dict(
-        torch.load('cache/programweb.train')), ProgramWebDataset.from_dict(
-        torch.load('cache/programweb.eval'))
+        torch.load('cache2/programweb.train')), ProgramWebDataset.from_dict(
+        torch.load('cache2/programweb.eval'))
 
     encoded_tag, tag_mask = dataset.encode_tag()
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）

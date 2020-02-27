@@ -164,7 +164,7 @@ class Engine(object):
                 self.state['encoded_tag'] = self.state['encoded_tag'].cuda(self.state['device_ids'][0])
             if 'tag_mask' in self.state:
                 self.state['tag_mask'] = self.state['tag_mask'].cuda(self.state['device_ids'][0])
-            criterion = criterion.cuda()
+            criterion = criterion.cuda(self.state['device_ids'][0])
 
         if self.state['evaluate']:
             self.validate(val_loader, model, criterion)
@@ -218,7 +218,7 @@ class Engine(object):
             self.on_start_batch(True, model, criterion, data_loader, optimizer)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda()
+                self.state['target'] = self.state['target'].cuda(self.state['device_ids'][0])
 
             self.on_forward(True, model, criterion, data_loader, optimizer)
 
@@ -253,7 +253,7 @@ class Engine(object):
             self.on_start_batch(False, model, criterion, data_loader)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda()
+                self.state['target'] = self.state['target'].cuda(self.state['device_ids'][0])
 
             self.on_forward(False, model, criterion, data_loader)
 
@@ -395,9 +395,9 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
         target_var = self.state['target']
         ids, token_type_ids, attention_mask = self.state['input']
-        ids = ids.cuda()
-        token_type_ids = token_type_ids.cuda()
-        attention_mask = attention_mask.cuda()
+        ids = ids.cuda(self.state['device_ids'][0])
+        token_type_ids = token_type_ids.cuda(self.state['device_ids'][0])
+        attention_mask = attention_mask.cuda(self.state['device_ids'][0])
 
         # compute output
         self.state['output'] = model(ids, token_type_ids, attention_mask, self.state['encoded_tag'], self.state['tag_mask'])
