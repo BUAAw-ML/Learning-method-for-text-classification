@@ -197,11 +197,21 @@ def build_dataset(api_csvfile=None, net_csvfile=None):
 
 
 def load_train_val_dataset(dataset):
+
+    data_len = len(dataset.data)
+    npr = np.random.RandomState(seed=0)
+    data_index = npr.permutation(data_len)
+
     data = dataset.data
     train_dataset = dataset
+
+
     val_dataset = copy.copy(dataset)
 
-    train_dataset.data = data[:-1000]
-    val_dataset.data = data[-1000:]
+    # train_dataset.data = data[:-1000]
+    # val_dataset.data = data[-1000:]
+
+    train_dataset.data = data[data_index[:-1000]]
+    val_dataset.data = data[data_index[-1000:]]
     return train_dataset, val_dataset
 
