@@ -50,6 +50,9 @@ class ProgramWebDataset(Dataset):
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
+                if len(dscp) > 500:
+                    continue
+
                 title_tokens = tokenizer.tokenize(title.strip())
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
                 title_ids = tokenizer.convert_tokens_to_ids(title_tokens)
