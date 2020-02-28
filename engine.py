@@ -11,6 +11,8 @@ from torch.utils.tensorboard import SummaryWriter
 from util import *
 from dataLoader import ProgramWebDataset
 
+import json
+
 
 tqdm.monitor_interval = 0
 
@@ -50,7 +52,7 @@ class Engine(object):
         self.state['data_time'] = tnt.meter.AverageValueMeter()
         # display parameters
         if self._state('use_pb') is None:
-            self.state['use_pb'] = True
+            self.state['use_pb'] = False
         if self._state('print_freq') is None:
             self.state['print_freq'] = 0
         # best score
@@ -179,8 +181,10 @@ class Engine(object):
 
             # train for one epoch
             self.train(train_loader, model, criterion, optimizer, epoch)
+
+
             # evaluate on validation set
-            prec1 = self.validate(val_loader, model, criterion)
+            prec1 = self.validate(val_loader, model, criterion, epoch)
 
             # remember best prec@1 and save checkpoint
             is_best = prec1 > self.state['best_score']
@@ -206,7 +210,7 @@ class Engine(object):
             data_loader = tqdm(data_loader, desc='Training')
 
         end = time.time()
-        for i, (input, target) in enumerate(data_loader):
+        for i, (input, target, _) in enumerate(data_loader):
             # measure data loading time
             self.state['iteration'] = i
             self.state['data_time_batch'] = time.time() - end
@@ -231,7 +235,7 @@ class Engine(object):
 
         self.on_end_epoch(True, model, criterion, data_loader, optimizer)
 
-    def validate(self, data_loader, model, criterion):
+    def validate(self, data_loader, model, criterion, epoch):
         # switch to evaluate mode
         model.eval()
 
@@ -241,7 +245,7 @@ class Engine(object):
             data_loader = tqdm(data_loader, desc='Test')
 
         end = time.time()
-        for i, (input, target) in enumerate(data_loader):
+        for i, (input, target, self.state['dscp']) in enumerate(data_loader):
             # measure data loading time
             self.state['iteration'] = i
             self.state['data_time_batch'] = time.time() - end
@@ -255,7 +259,10 @@ class Engine(object):
             if self.state['use_gpu']:
                 self.state['target'] = self.state['target'].cuda(self.state['device_ids'][0])
 
-            self.on_forward(False, model, criterion, data_loader)
+            output = self.on_forward(False, model, criterion, data_loader)
+
+            if epoch == self.state['max_epochs'] - 1:
+                self.recordResult(target, output)
 
             # measure elapsed time
             self.state['batch_time_current'] = time.time() - end
@@ -267,6 +274,22 @@ class Engine(object):
         score = self.on_end_epoch(False, model, criterion, data_loader)
 
         return score
+
+    def recordResult(self, target, output):
+        result = []
+        for i in range(len(target)):
+            buf = []
+            buf.append(self.state['dscp'][i])
+            buf.append(
+            [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1]
+            )
+            buf.append(
+            [self.state['id2tag'][index] for index in sorted(range(len(output[i])), key=lambda k: output[i][k], reverse=True)[:10]]
+            )
+            result.append(buf)
+
+        with open('testResult.json', 'a') as f:
+            json.dump(result, f)
 
     def save_checkpoint(self, state, is_best, filename='checkpoint.pth.tar'):
         if self._state('save_model_path') is not None:
@@ -413,6 +436,8 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
             self.state['loss'].backward()
             nn.utils.clip_grad_norm_(model.parameters(), max_norm=10.0)
             optimizer.step()
+        else:
+            return self.state['output']
 
 
     def on_start_batch(self, training, model, criterion, data_loader, optimizer=None, display=True):

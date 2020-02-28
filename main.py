@@ -6,12 +6,11 @@ from dataLoader import *
 
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
-# parser.add_argument('data', metavar='DIR',
+#
+# parser.add_argument('data_path', default='data/ProgrammerWeb/', type=str,
 #                     help='path to dataset (e.g. data/')
-
 # parser.add_argument('-num_classes', default=115, type=int, metavar='N',
 #                     help='number of domains')
-
 parser.add_argument('-seed', default=0, type=int, metavar='N',
                     help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
@@ -34,7 +33,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
-parser.add_argument('--print-freq', '-p', default=20, type=int,
+parser.add_argument('--print-freq', '-p', default=200, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
@@ -51,6 +50,10 @@ def multiLabel_text_classify():
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
+    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
+    # dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
+    #                         os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
+
 
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
     # train_dataset, val_dataset = load_train_val_dataset(dataset)
@@ -60,6 +63,7 @@ def multiLabel_text_classify():
     train_dataset, val_dataset = ProgramWebDataset.from_dict(
         torch.load('cache2/programweb.train')), ProgramWebDataset.from_dict(
         torch.load('cache2/programweb.eval'))
+
 
     encoded_tag, tag_mask = dataset.encode_tag()
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
@@ -81,6 +85,7 @@ def multiLabel_text_classify():
     state = {'batch_size': args.batch_size, 'max_epochs': args.epochs,
              'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': dataset.get_tags_num()}
     state['difficult_examples'] = False
+
     state['save_model_path'] = args.save_model_path
     state['log_dir'] = args.log_dir
     state['workers'] = args.workers
@@ -90,6 +95,11 @@ def multiLabel_text_classify():
     state['tag_mask'] = tag_mask
     state['device_ids'] = args.device_ids
     state['print_freq'] = args.print_freq
+
+    state['id2tag'] = dataset.id2tag
+
+
+
     if args.evaluate:
         state['evaluate'] = True
     engine = GCNMultiLabelMAPEngine(state)
