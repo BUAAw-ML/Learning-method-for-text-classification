@@ -190,7 +190,7 @@ class ProgramWebDataset(Dataset):
 
 def load_dataset(api_csvfile=None, net_csvfile=None):
 
-    cache_file_head = api_csvfile.split("/")[1]
+    cache_file_head = api_csvfile.split("/")[-1]
 
     if os.path.isfile(os.path.join('cache', cache_file_head + '.train')) \
             and os.path.isfile(os.path.join('cache', cache_file_head + '.eval')) \
