@@ -4,7 +4,6 @@ from models import *
 from util import *
 from dataLoader import *
 
-
 parser = argparse.ArgumentParser(description='Training Super-parameters')
 #
 # parser.add_argument('data_path', default='data/ProgrammerWeb/', type=str,
@@ -54,22 +53,19 @@ def multiLabel_text_classify():
     # dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
     #                         os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
 
-
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
     # train_dataset, val_dataset = load_train_val_dataset(dataset)
     # torch.save(train_dataset.to_dict(), './cache2/programweb.train')
     # torch.save(val_dataset.to_dict(), './cache2/programweb.eval')
-    
+
     train_dataset, val_dataset = ProgramWebDataset.from_dict(
         torch.load('cache2/programweb.train')), ProgramWebDataset.from_dict(
         torch.load('cache2/programweb.eval'))
-
 
     encoded_tag, tag_mask = dataset.encode_tag()
     # data_block = CrossValidationSplitter(dataset, seed)  #Shuffle the data and divide it into ten blocks（store dataIDs）
 
     # valData_block = 9  # choose a block as validation data
-
 
     model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat)
 
@@ -82,28 +78,17 @@ def multiLabel_text_classify():
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
 
-    state = {'batch_size': args.batch_size, 'max_epochs': args.epochs,
-             'evaluate': args.evaluate, 'resume': args.resume, 'num_classes': dataset.get_tags_num()}
-    state['difficult_examples'] = False
-
-    state['save_model_path'] = args.save_model_path
-    state['log_dir'] = args.log_dir
-    state['workers'] = args.workers
-    state['epoch_step'] = args.epoch_step
-    state['lr'] = args.lr
-    state['encoded_tag'] = encoded_tag
-    state['tag_mask'] = tag_mask
-    state['device_ids'] = args.device_ids
-    state['print_freq'] = args.print_freq
-
-    state['id2tag'] = dataset.id2tag
-
-
+    state = {'batch_size': args.batch_size, 'max_epochs': args.epochs, 'evaluate': args.evaluate, 'resume': args.resume,
+             'num_classes': dataset.get_tags_num(), 'difficult_examples': False,
+             'save_model_path': args.save_model_path, 'log_dir': args.log_dir, 'workers': args.workers,
+             'epoch_step': args.epoch_step, 'lr': args.lr, 'encoded_tag': encoded_tag, 'tag_mask': tag_mask,
+             'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': dataset.id2tag}
 
     if args.evaluate:
         state['evaluate'] = True
     engine = GCNMultiLabelMAPEngine(state)
     engine.learning(model, criterion, train_dataset, val_dataset, optimizer)
+
 
 if __name__ == '__main__':
     multiLabel_text_classify()

@@ -50,8 +50,6 @@ class ProgramWebDataset(Dataset):
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
-                # if len(dscp) > 1200:
-                #     continue
 
                 title_tokens = tokenizer.tokenize(title.strip())
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
@@ -188,7 +186,6 @@ class ProgramWebDataset(Dataset):
 #     data_index = np.array(data_index)
 #     data_block = data_index.reshape(10, -1)  # split the data into 10 groups
 #     return data_block
-
 
 
 def build_dataset(api_csvfile=None, net_csvfile=None):
