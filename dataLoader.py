@@ -32,8 +32,8 @@ class ProgramWebDataset(Dataset):
             data_dict.get('id2tag'))
 
     @classmethod
-    def from_csv(cls, csvfile, ignored_tags=None):
-        data, tag2id, id2tag = ProgramWebDataset.load(csvfile, ignored_tags=ignored_tags)
+    def from_csv(cls, api_csvfile, net_csvfile, ignored_tags=None):
+        data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile, ignored_tags=ignored_tags)
         co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
@@ -49,6 +49,9 @@ class ProgramWebDataset(Dataset):
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
+                # if len(dscp) > 1200:
+                #     continue
+
                 title_tokens = tokenizer.tokenize(title.strip())
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
                 if len(dscp_tokens) > 500:
@@ -77,6 +80,7 @@ class ProgramWebDataset(Dataset):
                     'dscp_ids': dscp_ids,
                     'dscp_tokens': dscp_tokens,
                     'tag_ids': tag_ids,
+                    'dscp': dscp
                 })
         os.makedirs('cache', exist_ok=True)
         return data, tag2id, id2tag
@@ -89,6 +93,32 @@ class ProgramWebDataset(Dataset):
             for t1 in range(len(tag_ids)):
                 for t2 in range(len(tag_ids)):
                     co_occur_mat[tag_ids[t1], tag_ids[t2]] += 1
+        return co_occur_mat
+
+    @classmethod
+    def similar_net(cls, csvfile, tag2id):
+
+        tags_num = len(tag2id)
+        co_occur_mat = torch.zeros(size=(tags_num, tags_num))
+        i = 0
+        with open(csvfile, newline='') as f:
+            reader = csv.reader(f, delimiter=',')
+            next(reader)
+            for row in reader:
+                if len(row) != 3:
+                    continue
+                tag1, similar, tag2 = row
+
+                if tag1 not in tag2id or tag2 not in tag2id:
+                    i += 1
+                    continue
+
+                tag1 = tag1.strip()
+                tag2 = tag2.strip()
+
+                co_occur_mat[tag2id[tag1], tag2id[tag2]] += float(similar)
+
+        print(i)
         return co_occur_mat
 
     def to_dict(self):
@@ -130,6 +160,7 @@ class ProgramWebDataset(Dataset):
         result = {}
         # construct input
         inputs = [e['title_ids'] + e['dscp_ids'] for e in batch]
+        #inputs = [e['dscp_ids'] for e in batch]
         lengths = np.array([len(e) for e in inputs])
         max_len = np.max(lengths)
         inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
@@ -140,7 +171,8 @@ class ProgramWebDataset(Dataset):
         tags = torch.zeros(size=(len(batch), self.get_tags_num()))
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1.
-        return (ids, token_type_ids, attention_mask), tags
+        dscp = [e['dscp'] for e in batch]
+        return (ids, token_type_ids, attention_mask), tags, dscp
 
 
 # def CrossValidationSplitter(dataset, seed):
@@ -157,23 +189,24 @@ class ProgramWebDataset(Dataset):
 #     return data_block
 
 
-def build_dataset(csvfile=None):
-    if os.path.isfile('cache2/ProgramWeb.state'):
+
+def build_dataset(api_csvfile=None, net_csvfile=None):
+    if os.path.isfile('cache/ProgramWeb.state'):
         return ProgramWebDataset.from_dict(
             torch.load('cache2/ProgramWeb.state'))
     else:
         ignored_tags = torch.load('./cache2/ignored_tags')
-        dataset = ProgramWebDataset.from_csv(csvfile, ignored_tags=ignored_tags)
+        dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
         torch.save(dataset.to_dict(), 'cache2/ProgramWeb.state')
         return dataset
 
 
 def load_train_val_dataset(dataset):
+
     data = np.array(dataset.data)
     train_dataset = dataset
     val_dataset = copy.copy(dataset)
     ind = np.random.permutation(len(data))
-
     train_dataset.data = data[ind[:-2000]].tolist()
     val_dataset.data = data[ind[-2000:]].tolist()
     return train_dataset, val_dataset
