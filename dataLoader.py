@@ -195,6 +195,8 @@ def load_dataset(api_csvfile=None, net_csvfile=None):
             and os.path.isfile(os.path.join('cache', api_csvfile + '.encoded_tag')) \
             and os.path.isfile(os.path.join('cache', api_csvfile + '.tag_mask')):
 
+        print("load dataset from cache")
+
         train_dataset, val_dataset = ProgramWebDataset.from_dict(
             torch.load(os.path.join('cache', api_csvfile + '.train'))), ProgramWebDataset.from_dict(
             torch.load(os.path.join('cache', api_csvfile + '.eval')))
@@ -203,16 +205,20 @@ def load_dataset(api_csvfile=None, net_csvfile=None):
 
     else:
 
+        print("build dataset")
+
         if not os.path.exists('cache'):
             os.makedirs('cache')
 
         ignored_tags = torch.load('./cache/ignored_tags')
         dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
 
+        cache_file_name = api_csvfile.split("/")[1]
+
         encoded_tag, tag_mask = dataset.encode_tag()
 
-        torch.save(encoded_tag, os.path.join('cache', api_csvfile + '.encoded_tag'))
-        torch.save(tag_mask, os.path.join('cache', api_csvfile + '.tag_mask'))
+        torch.save(encoded_tag, os.path.join('cache', cache_file_name + '.encoded_tag'))
+        torch.save(tag_mask, os.path.join('cache', cache_file_name + '.tag_mask'))
 
         data = np.array(dataset.data)
         train_dataset = dataset
@@ -222,8 +228,8 @@ def load_dataset(api_csvfile=None, net_csvfile=None):
         train_dataset.data = data[ind[:-2000]].tolist()
         val_dataset.data = data[ind[-2000:]].tolist()
 
-        torch.save(train_dataset.to_dict(), os.path.join('cache', api_csvfile + '.train'))
-        torch.save(val_dataset.to_dict(), os.path.join('cache', api_csvfile + '.eval'))
+        torch.save(train_dataset.to_dict(), os.path.join('cache', cache_file_name + '.train'))
+        torch.save(val_dataset.to_dict(), os.path.join('cache', cache_file_name + '.eval'))
 
     print("train_data_size: {}".format(len(train_dataset.data)))
     print("val_data_size: {}".format(len(val_dataset.data)))
