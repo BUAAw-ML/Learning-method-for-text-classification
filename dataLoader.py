@@ -189,7 +189,7 @@ class ProgramWebDataset(Dataset):
 
 
 def build_dataset(api_csvfile=None, net_csvfile=None):
-    if os.path.isfile('cache/ProgramWeb.state'):
+    if os.path.isfile('cache/ProgramWeb.state') and False:
         return ProgramWebDataset.from_dict(
             torch.load('cache2/ProgramWeb.state'))
     else:
