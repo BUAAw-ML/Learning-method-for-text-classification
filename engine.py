@@ -6,8 +6,9 @@ import torch.optim
 import torch.utils.data
 import torchnet as tnt
 import torch.nn as nn
-from util import *
+from torch.utils.tensorboard import SummaryWriter
 
+from util import *
 from dataLoader import ProgramWebDataset
 
 import json
@@ -17,6 +18,8 @@ tqdm.monitor_interval = 0
 
 class Engine(object):
     def __init__(self, state={}):
+        self.writer = SummaryWriter(state['log_dir'])
+        os.makedirs(state['log_dir'], exist_ok=True)
         self.state = state
         if self._state('use_gpu') is None:
             self.state['use_gpu'] = torch.cuda.is_available()
@@ -54,6 +57,8 @@ class Engine(object):
             self.state['print_freq'] = 0
         # best score
         self.state['best_score'] = 0.
+        self.state['train_iters'] = 0
+        self.state['eval_iters'] = 0
 
     def _state(self, name):
         if name in self.state:
@@ -82,6 +87,10 @@ class Engine(object):
         # record loss
         self.state['loss_batch'] = self.state['loss'].item()
         self.state['meter_loss'].add(self.state['loss_batch'])
+        if training:
+            self.writer.add_scalar('loss/train_batch_loss', self.state['loss'].item(), self.state['train_iters'] - 1)
+        else:
+            self.writer.add_scalar('loss/eval_batch_loss', self.state['loss'].item(), self.state['eval_iters'] - 1)
 
         if display and self.state['print_freq'] != 0 and self.state['iteration'] % self.state['print_freq'] == 0:
             loss = self.state['meter_loss'].value()[0]
@@ -112,6 +121,11 @@ class Engine(object):
         # compute output
         self.state['output'] = model(input_var)
         self.state['loss'] = criterion(self.state['output'], target_var)
+
+        if training:
+            self.state['train_iters'] += 1
+        else:
+            self.state['eval_iters'] += 1
 
         if training:
             optimizer.zero_grad()
@@ -152,7 +166,7 @@ class Engine(object):
                 self.state['encoded_tag'] = self.state['encoded_tag'].cuda(self.state['device_ids'][0])
             if 'tag_mask' in self.state:
                 self.state['tag_mask'] = self.state['tag_mask'].cuda(self.state['device_ids'][0])
-            criterion = criterion.cuda()
+            criterion = criterion.cuda(self.state['device_ids'][0])
 
         if self.state['evaluate']:
             self.validate(val_loader, model, criterion)
@@ -208,7 +222,7 @@ class Engine(object):
             self.on_start_batch(True, model, criterion, data_loader, optimizer)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda()
+                self.state['target'] = self.state['target'].cuda(self.state['device_ids'][0])
 
             self.on_forward(True, model, criterion, data_loader, optimizer)
 
@@ -243,7 +257,7 @@ class Engine(object):
             self.on_start_batch(False, model, criterion, data_loader)
 
             if self.state['use_gpu']:
-                self.state['target'] = self.state['target'].cuda()
+                self.state['target'] = self.state['target'].cuda(self.state['device_ids'][0])
 
             output = self.on_forward(False, model, criterion, data_loader)
 
@@ -348,7 +362,16 @@ class MultiLabelMAPEngine(Engine):
                       'CP_3: {CP:.4f}\t'
                       'CR_3: {CR:.4f}\t'
                       'CF1_3: {CF1:.4f}'.format(OP=OP_k, OR=OR_k, OF1=OF1_k, CP=CP_k, CR=CR_k, CF1=CF1_k))
-
+        if training:
+            self.writer.add_scalar('loss/train_epoch_loss', loss, self.state['epoch'])
+            self.writer.add_scalar('mAP/train_mAP', map, self.state['epoch'])
+            self.writer.add_scalar('OF1/train_OF1', OF1, self.state['epoch'])
+            self.writer.add_scalar('CF1/train_CF1', CF1, self.state['epoch'])
+        else:
+            self.writer.add_scalar('loss/eval_epoch_loss', loss, self.state['epoch'])
+            self.writer.add_scalar('mAP/eval_mAP', map, self.state['epoch'])
+            self.writer.add_scalar('OF1/eval_OF1', OF1, self.state['epoch'])
+            self.writer.add_scalar('CF1/eval_CF1', CF1, self.state['epoch'])
         return map
 
     def on_start_batch(self, training, model, criterion, data_loader, optimizer=None, display=True):
@@ -395,13 +418,19 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
     def on_forward(self, training, model, criterion, data_loader, optimizer=None, display=True):
         target_var = self.state['target']
         ids, token_type_ids, attention_mask = self.state['input']
-        ids = ids.cuda()
-        token_type_ids = token_type_ids.cuda()
-        attention_mask = attention_mask.cuda()
+        ids = ids.cuda(self.state['device_ids'][0])
+        token_type_ids = token_type_ids.cuda(self.state['device_ids'][0])
+        attention_mask = attention_mask.cuda(self.state['device_ids'][0])
 
         # compute output
         self.state['output'] = model(ids, token_type_ids, attention_mask, self.state['encoded_tag'], self.state['tag_mask'])
         self.state['loss'] = criterion(self.state['output'], target_var)
+
+        if training:
+            self.state['train_iters'] += 1
+        else:
+            self.state['eval_iters'] += 1
+
         if training:
             optimizer.zero_grad()
             self.state['loss'].backward()

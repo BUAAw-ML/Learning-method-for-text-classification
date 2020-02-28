@@ -32,14 +32,13 @@ class ProgramWebDataset(Dataset):
             data_dict.get('id2tag'))
 
     @classmethod
-    def from_csv(cls, api_csvfile, net_csvfile):
-        data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile)
-        #co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
-        co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
+    def from_csv(cls, api_csvfile, net_csvfile, ignored_tags=None):
+        data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile, ignored_tags=ignored_tags)
+        co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
-    def load(cls, f):
+    def load(cls, f, ignored_tags=None):
         data = []
         tag2id = {}
         id2tag = {}
@@ -55,10 +54,14 @@ class ProgramWebDataset(Dataset):
 
                 title_tokens = tokenizer.tokenize(title.strip())
                 dscp_tokens = tokenizer.tokenize(dscp.strip())
+                if len(dscp_tokens) > 500:
+                    continue
                 title_ids = tokenizer.convert_tokens_to_ids(title_tokens)
                 dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
                 tag = tag.strip().split('###')
                 tag = [t for t in tag if t != '']
+                if ignored_tags is not None:
+                    tag = [t for t in tag if t not in ignored_tags]
                 if len(tag) == 0:
                     continue
                 for t in tag:
@@ -186,32 +189,25 @@ class ProgramWebDataset(Dataset):
 #     return data_block
 
 
+
 def build_dataset(api_csvfile=None, net_csvfile=None):
-    if os.path.isfile('cache/ProgramWeb.state') and False:
+    if os.path.isfile('cache/ProgramWeb.state'):
         return ProgramWebDataset.from_dict(
-            torch.load('cache/ProgramWeb.state'))
+            torch.load('cache2/ProgramWeb.state'))
     else:
-        dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile)
-        torch.save(dataset.to_dict(), 'cache/ProgramWeb.state')
+        ignored_tags = torch.load('./cache2/ignored_tags')
+        dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
+        torch.save(dataset.to_dict(), 'cache2/ProgramWeb.state')
         return dataset
 
 
 def load_train_val_dataset(dataset):
 
-    data_len = len(dataset.data)
-    npr = np.random.RandomState(seed=0)
-    data_index = npr.permutation(data_len)
-
-    data = dataset.data
+    data = np.array(dataset.data)
     train_dataset = dataset
-
-
     val_dataset = copy.copy(dataset)
-
-    # train_dataset.data = data[:-1000]
-    # val_dataset.data = data[-1000:]
-
-    train_dataset.data = [data[i] for i in data_index[:-1000]]
-    val_dataset.data = [data[i] for i in data_index[-1000:]]
+    ind = np.random.permutation(len(data))
+    train_dataset.data = data[ind[:-2000]].tolist()
+    val_dataset.data = data[ind[-2000:]].tolist()
     return train_dataset, val_dataset
 
