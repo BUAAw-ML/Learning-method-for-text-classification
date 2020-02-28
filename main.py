@@ -50,10 +50,7 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
     dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
-    # dataset = build_dataset(os.path.join(args.data_path, 'data/ProgrammerWeb/programweb-data.csv'),
-    #                         os.path.join(args.data_path, 'data/ProgrammerWeb/tagnet.csv'))
 
-    dataset = build_dataset('data/ProgrammerWeb/programweb-data.csv')
     # train_dataset, val_dataset = load_train_val_dataset(dataset)
     # torch.save(train_dataset.to_dict(), './cache2/programweb.train')
     # torch.save(val_dataset.to_dict(), './cache2/programweb.eval')
