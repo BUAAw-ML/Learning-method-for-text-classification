@@ -81,7 +81,6 @@ class ProgramWebDataset(Dataset):
                     'tag_ids': tag_ids,
                     'dscp': dscp
                 })
-                print(data)
         os.makedirs('cache', exist_ok=True)
         return data, tag2id, id2tag
 
