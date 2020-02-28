@@ -189,24 +189,43 @@ class ProgramWebDataset(Dataset):
 #     return data_block
 
 
-def build_dataset(api_csvfile=None, net_csvfile=None):
-    if os.path.isfile('cache/ProgramWeb.state') and False:
-        return ProgramWebDataset.from_dict(
-            torch.load('cache2/ProgramWeb.state'))
+def load_dataset(api_csvfile=None, net_csvfile=None):
+
+    if os.path.isfile(os.path.join('cache', api_csvfile + '.train')) \
+            and os.path.isfile(os.path.join('cache', api_csvfile + '.eval')):
+
+        train_dataset, val_dataset = ProgramWebDataset.from_dict(
+            torch.load(os.path.join('cache', api_csvfile + '.train'))), ProgramWebDataset.from_dict(
+            torch.load(os.path.join('cache', api_csvfile + '.eval')))
+
     else:
-        ignored_tags = torch.load('./cache2/ignored_tags')
+
+        if not os.path.exists('cache'):
+            os.makedirs('cache')
+
+        ignored_tags = torch.load('./cache/ignored_tags')
         dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
-        torch.save(dataset.to_dict(), 'cache2/ProgramWeb.state')
-        return dataset
+
+        data = np.array(dataset.data)
+        train_dataset = dataset
+        val_dataset = copy.copy(dataset)
+        ind = np.random.permutation(len(data))
+
+        train_dataset.data = data[ind[:-2000]].tolist()
+        val_dataset.data = data[ind[-2000:]].tolist()
+
+        torch.save(train_dataset.to_dict(), './cache/programweb.train')
+        torch.save(val_dataset.to_dict(), './cache/programweb.eval')
+
+    print("train_data_size: {}".format(len(train_dataset.data)))
+    print("val_data_size: {}".format(len(val_dataset.data)))
+
+    encoded_tag, tag_mask = train_dataset.encode_tag()
+
+    return train_dataset, val_dataset, encoded_tag, tag_mask
 
 
-def load_train_val_dataset(dataset):
 
-    data = np.array(dataset.data)
-    train_dataset = dataset
-    val_dataset = copy.copy(dataset)
-    ind = np.random.permutation(len(data))
-    train_dataset.data = data[ind[:-2000]].tolist()
-    val_dataset.data = data[ind[-2000:]].tolist()
-    return train_dataset, val_dataset
+
+
 
