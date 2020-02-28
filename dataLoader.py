@@ -189,14 +189,14 @@ class ProgramWebDataset(Dataset):
 
 
 def build_dataset(api_csvfile=None, net_csvfile=None):
-    if os.path.isfile('cache/ProgramWeb.state') and False:
-        return ProgramWebDataset.from_dict(
-            torch.load('cache2/ProgramWeb.state'))
-    else:
-        ignored_tags = torch.load('./cache2/ignored_tags')
-        dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
-        torch.save(dataset.to_dict(), 'cache2/ProgramWeb.state')
-        return dataset
+    # if os.path.isfile('cache/ProgramWeb.state') and False:
+    #     return ProgramWebDataset.from_dict(
+    #         torch.load('cache2/ProgramWeb.state'))
+    # else:
+    ignored_tags = torch.load('./cache2/ignored_tags')
+    dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
+    torch.save(dataset.to_dict(), 'cache2/ProgramWeb.state')
+    return dataset
 
 
 def load_train_val_dataset(dataset):
