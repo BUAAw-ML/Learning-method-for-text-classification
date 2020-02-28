@@ -10,7 +10,6 @@ from torch.utils.data import Dataset
 from transformers import BertTokenizer
 import numpy as np
 
-
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
 token_table = {'ecommerce': 'electronic commerce'}
@@ -28,9 +27,9 @@ class ProgramWebDataset(Dataset):
     @classmethod
     def from_dict(cls, data_dict):
         return ProgramWebDataset(data_dict.get('data'),
-            data_dict.get('co_occur_mat'),
-            data_dict.get('tag2id'),
-            data_dict.get('id2tag'))
+                                 data_dict.get('co_occur_mat'),
+                                 data_dict.get('tag2id'),
+                                 data_dict.get('id2tag'))
 
     @classmethod
     def from_csv(cls, api_csvfile, net_csvfile, ignored_tags=None):
@@ -154,15 +153,15 @@ class ProgramWebDataset(Dataset):
             mask[i, :len(tag_ids[i])] = 1.
             padded_tag_ids[i, :len(tag_ids[i])] = torch.tensor(tag_ids[i])
         return padded_tag_ids, mask
-        
+
     def collate_fn(self, batch):
         result = {}
         # construct input
         inputs = [e['title_ids'] + e['dscp_ids'] for e in batch]
-        #inputs = [e['dscp_ids'] for e in batch]
+        # inputs = [e['dscp_ids'] for e in batch]
         lengths = np.array([len(e) for e in inputs])
         max_len = np.max(lengths)
-        inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
+        inputs = [tokenizer.prepare_for_model(e, max_length=max_len + 2, pad_to_max_length=True) for e in inputs]
         ids = torch.LongTensor([e['input_ids'] for e in inputs])
         token_type_ids = torch.LongTensor([e['token_type_ids'] for e in inputs])
         attention_mask = torch.FloatTensor([e['attention_mask'] for e in inputs])
@@ -192,11 +191,15 @@ class ProgramWebDataset(Dataset):
 def load_dataset(api_csvfile=None, net_csvfile=None):
 
     if os.path.isfile(os.path.join('cache', api_csvfile + '.train')) \
-            and os.path.isfile(os.path.join('cache', api_csvfile + '.eval')):
+            and os.path.isfile(os.path.join('cache', api_csvfile + '.eval')) \
+            and os.path.isfile(os.path.join('cache', api_csvfile + '.encoded_tag')) \
+            and os.path.isfile(os.path.join('cache', api_csvfile + '.tag_mask')):
 
         train_dataset, val_dataset = ProgramWebDataset.from_dict(
             torch.load(os.path.join('cache', api_csvfile + '.train'))), ProgramWebDataset.from_dict(
             torch.load(os.path.join('cache', api_csvfile + '.eval')))
+        encoded_tag, tag_mask = torch.load(os.path.join('cache', api_csvfile + '.encoded_tag')), \
+                                torch.load(os.path.join('cache', api_csvfile + '.tag_mask'))
 
     else:
 
@@ -206,6 +209,11 @@ def load_dataset(api_csvfile=None, net_csvfile=None):
         ignored_tags = torch.load('./cache/ignored_tags')
         dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
 
+        encoded_tag, tag_mask = dataset.encode_tag()
+
+        torch.save(encoded_tag, os.path.join('cache', api_csvfile + '.encoded_tag'))
+        torch.save(tag_mask, os.path.join('cache', api_csvfile + '.tag_mask'))
+
         data = np.array(dataset.data)
         train_dataset = dataset
         val_dataset = copy.copy(dataset)
@@ -214,18 +222,10 @@ def load_dataset(api_csvfile=None, net_csvfile=None):
         train_dataset.data = data[ind[:-2000]].tolist()
         val_dataset.data = data[ind[-2000:]].tolist()
 
-        torch.save(train_dataset.to_dict(), './cache/programweb.train')
-        torch.save(val_dataset.to_dict(), './cache/programweb.eval')
+        torch.save(train_dataset.to_dict(), os.path.join('cache', api_csvfile + '.train'))
+        torch.save(val_dataset.to_dict(), os.path.join('cache', api_csvfile + '.eval'))
 
     print("train_data_size: {}".format(len(train_dataset.data)))
     print("val_data_size: {}".format(len(val_dataset.data)))
 
-    encoded_tag, tag_mask = train_dataset.encode_tag()
-
     return train_dataset, val_dataset, encoded_tag, tag_mask
-
-
-
-
-
-
