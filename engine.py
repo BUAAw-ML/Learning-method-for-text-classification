@@ -13,8 +13,8 @@ from dataLoader import ProgramWebDataset
 
 import json
 
-
 tqdm.monitor_interval = 0
+
 
 class Engine(object):
     def __init__(self, state={}):
@@ -136,7 +136,8 @@ class Engine(object):
         # data loading code
         train_loader = torch.utils.data.DataLoader(train_dataset,
                                                    batch_size=self.state['batch_size'], shuffle=False,
-                                                   num_workers=self.state['workers'], collate_fn=train_dataset.collate_fn)
+                                                   num_workers=self.state['workers'],
+                                                   collate_fn=train_dataset.collate_fn)
 
         val_loader = torch.utils.data.DataLoader(val_dataset,
                                                  batch_size=self.state['batch_size'], shuffle=False,
@@ -177,11 +178,10 @@ class Engine(object):
         for epoch in range(self.state['start_epoch'], self.state['max_epochs']):
             self.state['epoch'] = epoch
             lr = self.adjust_learning_rate(optimizer)
-            print('lr:',lr)
+            print('lr:', lr)
 
             # train for one epoch
             self.train(train_loader, model, criterion, optimizer, epoch)
-
 
             # evaluate on validation set
             prec1 = self.validate(val_loader, model, criterion, epoch)
@@ -278,15 +278,12 @@ class Engine(object):
     def recordResult(self, target, output):
         result = []
         for i in range(len(target)):
-            buf = []
-            buf.append(self.state['dscp'][i])
-            buf.append(
-            [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1]
-            )
-            buf.append(
-            [self.state['id2tag'][index] for index in sorted(range(len(output[i])), key=lambda k: output[i][k], reverse=True)[:10]]
-            )
-            result.append(buf)
+            buf = [self.state['dscp'][i],
+                   [self.state['id2tag'][index] for (index, value) in enumerate(target[i]) if value == 1],
+                   [self.state['id2tag'][index] for index in
+                    sorted(range(len(output[i])), key=lambda k: output[i][k], reverse=True)[:10]]]
+            if buf[2][0] not in buf[1]:
+                result.append(buf)
 
         with open('testResult.json', 'a') as f:
             json.dump(result, f)
@@ -307,7 +304,8 @@ class Engine(object):
             if self._state('save_model_path') is not None:
                 if self._state('filename_previous_best') is not None:
                     os.remove(self._state('filename_previous_best'))
-                filename_best = os.path.join(self.state['save_model_path'], 'model_best_{score:.4f}.pth.tar'.format(score=state['best_score']))
+                filename_best = os.path.join(self.state['save_model_path'],
+                                             'model_best_{score:.4f}.pth.tar'.format(score=state['best_score']))
                 shutil.copyfile(filename, filename_best)
                 self.state['filename_previous_best'] = filename_best
 
@@ -423,7 +421,8 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
         attention_mask = attention_mask.cuda(self.state['device_ids'][0])
 
         # compute output
-        self.state['output'] = model(ids, token_type_ids, attention_mask, self.state['encoded_tag'], self.state['tag_mask'])
+        self.state['output'] = model(ids, token_type_ids, attention_mask, self.state['encoded_tag'],
+                                     self.state['tag_mask'])
         self.state['loss'] = criterion(self.state['output'], target_var)
 
         if training:
@@ -439,7 +438,6 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
         else:
             return self.state['output']
 
-
     def on_start_batch(self, training, model, criterion, data_loader, optimizer=None, display=True):
 
         self.state['target_gt'] = self.state['target'].clone()
@@ -449,4 +447,3 @@ class GCNMultiLabelMAPEngine(MultiLabelMAPEngine):
         # input = self.state['input']
         # self.state['feature'] = input[0]
         # self.state['input'] = input[2]
-
