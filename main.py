@@ -49,8 +49,8 @@ def multiLabel_text_classify():
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
-    train_dataset, val_dataset, encoded_tag, tag_mask = load_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
-
+    train_dataset, val_dataset, encoded_tag, tag_mask = \
+        load_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
 
     model = gcn_bert(num_classes=len(train_dataset.tag2id), t=0.4, co_occur_mat=train_dataset.co_occur_mat)
 

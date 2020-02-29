@@ -34,7 +34,8 @@ class ProgramWebDataset(Dataset):
     @classmethod
     def from_csv(cls, api_csvfile, net_csvfile, ignored_tags=None):
         data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile, ignored_tags=ignored_tags)
-        co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
+        #co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
+        co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
