@@ -77,7 +77,7 @@ class GCNBert(nn.Module):
         # x = torch.matmul(sentence_feat, x)
 
         linear = nn.Linear(len(sentence_feat), len(tag_embedding))
-        x = linear(sentence_feat)
+        x = linear(sentence_feat.cuda())
 
         return x
 
