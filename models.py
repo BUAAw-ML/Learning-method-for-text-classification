@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 from transformers import BertModel
 
+from torch.autograd import Variable
+
 class GraphConvolution(nn.Module):
     """
     Simple GCN layer, similar to https://arxiv.org/abs/1609.02907
@@ -77,7 +79,7 @@ class GCNBert(nn.Module):
         # x = torch.matmul(sentence_feat, x)
 
         linear = nn.Linear(len(sentence_feat), len(tag_embedding))
-        x = linear(sentence_feat.cuda())
+        x = linear(Variable(sentence_feat).cuda())
 
         return x
 
