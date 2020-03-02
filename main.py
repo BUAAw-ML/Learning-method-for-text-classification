@@ -42,6 +42,8 @@ parser.add_argument('--save_model_path', default='./checkpoint', type=str,
                     help='path to save checkpoint (default: none)')
 parser.add_argument('--log_dir', default='./logs', type=str,
                     help='path to save log (default: none)')
+parser.add_argument('--model_type', default='GCNBert', type=str,
+                    help='The type of model to train')
 
 
 def multiLabel_text_classify():
@@ -52,7 +54,11 @@ def multiLabel_text_classify():
     train_dataset, val_dataset, encoded_tag, tag_mask = \
         load_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
 
-    model = gcn_bert(num_classes=len(train_dataset.tag2id), t=0.4, co_occur_mat=train_dataset.co_occur_mat)
+    if args.model_type == 'GCNBert':
+        model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat, bert_trainable=True)
+    elif args.model_type == 'MLPBert':
+        model = mlp_bert(num_classes=len(dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
+
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()

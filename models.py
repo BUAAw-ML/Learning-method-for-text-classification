@@ -43,12 +43,13 @@ class GraphConvolution(nn.Module):
 
 
 class GCNBert(nn.Module):
-    def __init__(self, bert, num_classes, t=0, co_occur_mat=None):
+    def __init__(self, bert, num_classes, t=0, co_occur_mat=None, bert_trainable=True):
         super(GCNBert, self).__init__()
         
         self.add_module('bert', bert)
-        for m in self.bert.parameters():
-            m.requires_grad = True#False
+        if not bert_trainable:
+            for m in self.bert.parameters():
+                m.requires_grad = False
         
         self.num_classes = num_classes
 
@@ -67,8 +68,6 @@ class GCNBert(nn.Module):
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
             / torch.sum(attention_mask, dim=1, keepdim=True)
 
-
-
         embed = self.bert.get_input_embeddings()
         tag_embedding = embed(encoded_tag)
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
@@ -80,13 +79,8 @@ class GCNBert(nn.Module):
         x = x.transpose(0, 1)
         x = torch.matmul(sentence_feat, x)
 
-
-        # linear1 = nn.Linear(sentence_feat.size()[1], 768).cuda()
-        #
-        # linear2 = nn.Linear(768, 81).cuda()
-        # # x = linear1(sentence_feat)
-        # # x = self.relu(x)
-        # x = linear2(sentence_feat)
+        # linear = nn.Linear(len(sentence_feat), len(tag_embedding))
+        # x = linear(sentence_feat)
 
         return x
 
@@ -98,6 +92,53 @@ class GCNBert(nn.Module):
                 ]
 
 
-def gcn_bert(num_classes, t, co_occur_mat=None):
+class MLPBert(nn.Module):
+    def __init__(self, bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+        super(MLPBert, self).__init__()
+        
+        self.add_module('bert', bert)
+        if not bert_trainable:
+            for m in self.bert.parameters():
+                m.requires_grad = False
+        
+        self.num_classes = num_classes
+        self.hidden_layer_num = hidden_layer_num
+        self.hidden_list = nn.ModuleList()
+        for i in range(hidden_layer_num):
+            if i == 0:
+                self.hidden_list.append(nn.Linear(768, hidden_dim))
+            else:
+                self.hidden_list.append(nn.Linear(hidden_dim, hidden_dim))
+        self.output = nn.Linear(hidden_dim, num_classes)
+        self.act = nn.ReLU()
+
+    def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
+        token_feat = self.bert(ids,
+            token_type_ids=token_type_ids,
+            attention_mask=attention_mask)[0]
+        sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
+            / torch.sum(attention_mask, dim=1, keepdim=True)
+        
+        x = sentence_feat
+        for i in range(self.hidden_layer_num):
+            x = self.hidden_list[i](x)
+            x = self.act(x)
+        y = self.output(x)
+        return y
+    
+    def get_config_optim(self, lr, lrp):
+        return [
+                {'params': self.bert.parameters(), 'lr': lr * lrp},
+                {'params': self.hidden_list.parameters(), 'lr': lr},
+                {'params': self.output.parameters(), 'lr': lr},
+                ]
+
+
+def gcn_bert(num_classes, t, co_occur_mat=None, bert_trainable=True):
     bert = BertModel.from_pretrained('bert-base-uncased')
-    return GCNBert(bert, num_classes, t=t, co_occur_mat=co_occur_mat)
+    return GCNBert(bert, num_classes, t=t, co_occur_mat=co_occur_mat, bert_trainable=bert_trainable)
+
+
+def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+    bert = BertModel.from_pretrained('bert-base-uncased')
+    return MLPBert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)

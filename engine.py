@@ -234,7 +234,8 @@ class Engine(object):
             self.on_end_batch(True, model, criterion, data_loader, optimizer)
 
         self.on_end_epoch(True, model, criterion, data_loader, optimizer)
-
+    
+    @torch.no_grad()
     def validate(self, data_loader, model, criterion, epoch):
         # switch to evaluate mode
         model.eval()
