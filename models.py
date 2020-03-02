@@ -48,7 +48,7 @@ class GCNBert(nn.Module):
         
         self.add_module('bert', bert)
         for m in self.bert.parameters():
-            m.requires_grad = False
+            m.requires_grad = True#False
         
         self.num_classes = num_classes
 
@@ -67,6 +67,8 @@ class GCNBert(nn.Module):
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
             / torch.sum(attention_mask, dim=1, keepdim=True)
 
+
+
         embed = self.bert.get_input_embeddings()
         tag_embedding = embed(encoded_tag)
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
@@ -78,8 +80,13 @@ class GCNBert(nn.Module):
         x = x.transpose(0, 1)
         x = torch.matmul(sentence_feat, x)
 
-        # linear = nn.Linear(len(sentence_feat), len(tag_embedding))
-        # x = linear(sentence_feat)
+
+        # linear1 = nn.Linear(sentence_feat.size()[1], 768).cuda()
+        #
+        # linear2 = nn.Linear(768, 81).cuda()
+        # # x = linear1(sentence_feat)
+        # # x = self.relu(x)
+        # x = linear2(sentence_feat)
 
         return x
 
