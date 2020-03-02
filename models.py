@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 from transformers import BertModel
 
+from torch.autograd import Variable
+
 class GraphConvolution(nn.Module):
     """
     Simple GCN layer, similar to https://arxiv.org/abs/1609.02907
@@ -65,7 +67,7 @@ class GCNBert(nn.Module):
             attention_mask=attention_mask)[0]
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
             / torch.sum(attention_mask, dim=1, keepdim=True)
-        
+
         embed = self.bert.get_input_embeddings()
         tag_embedding = embed(encoded_tag)
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
@@ -76,6 +78,10 @@ class GCNBert(nn.Module):
 
         x = x.transpose(0, 1)
         x = torch.matmul(sentence_feat, x)
+
+        # linear = nn.Linear(len(sentence_feat), len(tag_embedding))
+        # x = linear(sentence_feat)
+
         return x
 
     def get_config_optim(self, lr, lrp):

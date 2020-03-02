@@ -10,7 +10,6 @@ from torch.utils.data import Dataset
 from transformers import BertTokenizer
 import numpy as np
 
-
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
 token_table = {'ecommerce': 'electronic commerce'}
@@ -28,14 +27,15 @@ class ProgramWebDataset(Dataset):
     @classmethod
     def from_dict(cls, data_dict):
         return ProgramWebDataset(data_dict.get('data'),
-            data_dict.get('co_occur_mat'),
-            data_dict.get('tag2id'),
-            data_dict.get('id2tag'))
+                                 data_dict.get('co_occur_mat'),
+                                 data_dict.get('tag2id'),
+                                 data_dict.get('id2tag'))
 
     @classmethod
     def from_csv(cls, api_csvfile, net_csvfile, ignored_tags=None):
         data, tag2id, id2tag = ProgramWebDataset.load(api_csvfile, ignored_tags=ignored_tags)
         co_occur_mat = ProgramWebDataset.stat_cooccurence(data, len(tag2id))
+        #co_occur_mat = ProgramWebDataset.similar_net(net_csvfile, tag2id)
         return ProgramWebDataset(data, co_occur_mat, tag2id, id2tag)
 
     @classmethod
@@ -154,15 +154,15 @@ class ProgramWebDataset(Dataset):
             mask[i, :len(tag_ids[i])] = 1.
             padded_tag_ids[i, :len(tag_ids[i])] = torch.tensor(tag_ids[i])
         return padded_tag_ids, mask
-        
+
     def collate_fn(self, batch):
         result = {}
         # construct input
         inputs = [e['title_ids'] + e['dscp_ids'] for e in batch]
-        #inputs = [e['dscp_ids'] for e in batch]
+        # inputs = [e['dscp_ids'] for e in batch]
         lengths = np.array([len(e) for e in inputs])
         max_len = np.max(lengths)
-        inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
+        inputs = [tokenizer.prepare_for_model(e, max_length=max_len + 2, pad_to_max_length=True) for e in inputs]
         ids = torch.LongTensor([e['input_ids'] for e in inputs])
         token_type_ids = torch.LongTensor([e['token_type_ids'] for e in inputs])
         attention_mask = torch.FloatTensor([e['attention_mask'] for e in inputs])
@@ -189,24 +189,50 @@ class ProgramWebDataset(Dataset):
 #     return data_block
 
 
-def build_dataset(api_csvfile=None, net_csvfile=None):
-    if os.path.isfile('cache/ProgramWeb.state') and False:
-        return ProgramWebDataset.from_dict(
-            torch.load('cache2/ProgramWeb.state'))
+def load_dataset(api_csvfile=None, net_csvfile=None):
+
+    cache_file_head = api_csvfile.split("/")[-1]
+
+    if os.path.isfile(os.path.join('cache', cache_file_head + '.train')) \
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.eval')) \
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.encoded_tag')) \
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')):
+
+        print("load dataset from cache")
+
+        train_dataset, val_dataset = ProgramWebDataset.from_dict(
+            torch.load(os.path.join('cache', cache_file_head + '.train'))), ProgramWebDataset.from_dict(
+            torch.load(os.path.join('cache', cache_file_head + '.eval')))
+        encoded_tag, tag_mask = torch.load(os.path.join('cache', cache_file_head + '.encoded_tag')), \
+                                torch.load(os.path.join('cache', cache_file_head + '.tag_mask'))
+
     else:
-        ignored_tags = torch.load('./cache2/ignored_tags')
+
+        print("build dataset")
+
+        if not os.path.exists('cache'):
+            os.makedirs('cache')
+
+        ignored_tags = torch.load('./cache/ignored_tags')
         dataset = ProgramWebDataset.from_csv(api_csvfile, net_csvfile, ignored_tags=ignored_tags)
-        torch.save(dataset.to_dict(), 'cache2/ProgramWeb.state')
-        return dataset
 
+        encoded_tag, tag_mask = dataset.encode_tag()
 
-def load_train_val_dataset(dataset):
+        torch.save(encoded_tag, os.path.join('cache', cache_file_head + '.encoded_tag'))
+        torch.save(tag_mask, os.path.join('cache', cache_file_head + '.tag_mask'))
 
-    data = np.array(dataset.data)
-    train_dataset = dataset
-    val_dataset = copy.copy(dataset)
-    ind = np.random.permutation(len(data))
-    train_dataset.data = data[ind[:-2000]].tolist()
-    val_dataset.data = data[ind[-2000:]].tolist()
-    return train_dataset, val_dataset
+        data = np.array(dataset.data)
+        train_dataset = dataset
+        val_dataset = copy.copy(dataset)
+        ind = np.random.permutation(len(data))
 
+        train_dataset.data = data[ind[:-2000]].tolist()
+        val_dataset.data = data[ind[-2000:]].tolist()
+
+        torch.save(train_dataset.to_dict(), os.path.join('cache', cache_file_head + '.train'))
+        torch.save(val_dataset.to_dict(), os.path.join('cache', cache_file_head + '.eval'))
+
+    print("train_data_size: {}".format(len(train_dataset.data)))
+    print("val_data_size: {}".format(len(val_dataset.data)))
+
+    return train_dataset, val_dataset, encoded_tag, tag_mask

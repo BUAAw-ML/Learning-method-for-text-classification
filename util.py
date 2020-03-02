@@ -220,25 +220,22 @@ def gen_A(num_classes, t, co_occur_mat):
     return _adj
 
 # def gen_A(num_classes, t, co_occur_mat):
-#     import pickle
+#
 #     _adj = co_occur_mat.numpy()
-#     # _nums = _adj.diagonal()
-#     # _nums = _nums[:, np.newaxis]
-#     # _adj = _adj / _nums
 #
 #     # _adj[_adj < 0.01] = 0
 #     # _adj[_adj >= 0.01] = 1
 #     # _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
 #     # _adj = _adj + np.identity(num_classes, np.int)
 #     # _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
-#     _adj = _adj + np.identity(num_classes, np.int)
-#     _adj = _adj / (_adj.sum(1, keepdims=True) + 1e-6)
 #
+#     _adj = _adj / (_adj.sum(1, keepdims=True) + 1e-6)
+#     _adj = _adj + np.identity(num_classes, np.int)
 #
 #     # with open('adj.json', 'w') as f:
 #     #     json.dump(_adj, f)
-#
-#     return _adj
+
+    return _adj
 
 def gen_adj(A):
     D = torch.pow(A.sum(1), -0.5)
