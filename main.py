@@ -55,9 +55,9 @@ def multiLabel_text_classify():
         load_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
 
     if args.model_type == 'GCNBert':
-        model = gcn_bert(num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat, bert_trainable=True)
+        model = gcn_bert(num_classes=len(train_dataset.tag2id), t=0.4, co_occur_mat=train_dataset.co_occur_mat, bert_trainable=True)
     elif args.model_type == 'MLPBert':
-        model = mlp_bert(num_classes=len(dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
+        model = mlp_bert(num_classes=len(train_dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
 
 
     # define loss function (criterion)
