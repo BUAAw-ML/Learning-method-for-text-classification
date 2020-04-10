@@ -29,10 +29,21 @@ class allData(Dataset):
 
     @classmethod
     def from_dict(cls, data_dict):
-        return allData(data_dict.get('data'),
+        return allData(data_dict.get('train_data'),
+                                 data_dict.get('test_data'),
                                  data_dict.get('co_occur_mat'),
                                  data_dict.get('tag2id'),
                                  data_dict.get('id2tag'))
+
+    def to_dict(self):
+        data_dict = {
+            'train_data': self.train_data,
+            'test_data': self.test_data,
+            'co_occur_mat': self.co_occur_mat,
+            'tag2id': self.tag2id,
+            'id2tag': self.id2tag
+        }
+        return data_dict
 
     @classmethod
     def from_csv(cls, data_path):
@@ -191,15 +202,6 @@ class allData(Dataset):
 
         print(i)
         return co_occur_mat
-
-    def to_dict(self):
-        data_dict = {
-            'data': self.data,
-            'co_occur_mat': self.co_occur_mat,
-            'tag2id': self.tag2id,
-            'id2tag': self.id2tag
-        }
-        return data_dict
 
     def get_tags_num(self):
         return len(self.tag2id)
