@@ -3,7 +3,6 @@ from util import *
 import torch
 import torch.nn as nn
 from transformers import BertModel
-
 from torch.autograd import Variable
 
 class GraphConvolution(nn.Module):
@@ -169,16 +168,3 @@ class MABert(nn.Module):
         ]
 
 
-def gcn_bert(num_classes, t, co_occur_mat=None, bert_trainable=True):
-    bert = BertModel.from_pretrained('bert-base-uncased')
-    return GCNBert(bert, num_classes, t=t, co_occur_mat=co_occur_mat, bert_trainable=bert_trainable)
-
-
-def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
-    bert = BertModel.from_pretrained('bert-base-uncased')
-    return MLPBert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)
-
-
-def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
-    bert = BertModel.from_pretrained('bert-base-uncased')
-    return MABert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)

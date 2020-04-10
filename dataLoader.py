@@ -16,9 +16,10 @@ tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 token_table = {'ecommerce': 'electronic commerce'}
 
 
-class allDataObject(Dataset):
-    def __init__(self, data, co_occur_mat, tag2id, id2tag=None, tfidf_dict=None):
-        self.data = data
+class allData(Dataset):
+    def __init__(self, train_data=None, test_data=None, co_occur_mat=None, tag2id=None, id2tag=None, tfidf_dict=None):
+        self.train_data = train_data
+        self.test_data = test_data
         self.co_occur_mat = co_occur_mat
         self.tag2id = tag2id
         if id2tag is None:
@@ -28,19 +29,25 @@ class allDataObject(Dataset):
 
     @classmethod
     def from_dict(cls, data_dict):
-        return allDataObject(data_dict.get('data'),
+        return allData(data_dict.get('data'),
                                  data_dict.get('co_occur_mat'),
                                  data_dict.get('tag2id'),
                                  data_dict.get('id2tag'))
 
     @classmethod
-    def from_csv(cls, all_data_file, net_csvfile):
-        data, tag2id, id2tag, document,tag_based = allDataObject.load_programWeb(all_data_file)
-        co_occur_mat = allDataObject.stat_cooccurence(data,len(tag2id))
+    def from_csv(cls, data_path, net_csvfile):
+        data, tag2id, id2tag, document, tag_based = allData.load_programWeb(data_path)
 
-        tfidf_dict = allDataObject.get_tfidf_dict(document)
+        data = np.array(data)
+        ind = np.random.RandomState(seed=10).permutation(len(data))
+        split = int(len(data) * 0.85)
+        train_data = data[ind[:split]].tolist()
+        test_data = data[ind[split:]].tolist()
 
-        return allDataObject(data, co_occur_mat, tag2id, id2tag, tfidf_dict)
+        co_occur_mat = allData.stat_cooccurence(data, len(tag2id))
+        tfidf_dict = allData.get_tfidf_dict(document)
+
+        return allData(train_data, test_data, co_occur_mat, tag2id, id2tag, tfidf_dict)
 
     @classmethod
     def load_programWeb(cls, f):
@@ -194,12 +201,6 @@ class allDataObject(Dataset):
         }
         return data_dict
 
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        return self.data[index]
-
     def get_tags_num(self):
         return len(self.tag2id)
 
@@ -265,20 +266,176 @@ class allDataObject(Dataset):
         return (ids, token_type_ids, attention_mask), tags, dscp
 
 
-def load_dataset(all_data_file=None, net_csvfile=None):
+def load_allData(data_path=None):
 
-    cache_file_head = all_data_file.split("/")[-1]
+    cache_file_head = data_path.split("/")[-1]
 
-    if os.path.isfile(os.path.join('cache', cache_file_head + '.train')) \
-            and os.path.isfile(os.path.join('cache', cache_file_head + '.eval')) \
+    if os.path.isfile(os.path.join('cache', cache_file_head + '.dataset')) \
             and os.path.isfile(os.path.join('cache', cache_file_head + '.encoded_tag')) \
             and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')):
 
         print("load dataset from cache")
 
-        train_dataset, val_dataset = allDataObject.from_dict(
-            torch.load(os.path.join('cache', cache_file_head + '.train'))), allDataObject.from_dict(
-            torch.load(os.path.join('cache', cache_file_head + '.eval')))
+        dataset = TrainTestData.from_dict(torch.load(os.path.join('cache', cache_file_head + '.dataset')))
+
+        encoded_tag, tag_mask = torch.load(os.path.join('cache', cache_file_head + '.encoded_tag')), \
+                                torch.load(os.path.join('cache', cache_file_head + '.tag_mask'))
+
+    else:
+
+        print("build dataset")
+        if not os.path.exists('cache'):
+            os.makedirs('cache')
+
+        dataset = allData.from_csv(data_path)
+        torch.save(dataset.to_dict(), os.path.join('cache', cache_file_head + '.dataset'))
+
+        encoded_tag, tag_mask = dataset.encode_tag()
+        torch.save(encoded_tag, os.path.join('cache', cache_file_head + '.encoded_tag'))
+        torch.save(tag_mask, os.path.join('cache', cache_file_head + '.tag_mask'))
+
+    print("train_data_size: {}".format(len(dataset.train_data)))
+    print("val_data_size: {}".format(len(dataset.test_data)))
+
+    # tag_embedding_file = dataset.obtain_tag_embedding()
+
+    return dataset, encoded_tag, tag_mask
+
+
+class TrainTestData(Dataset):
+    def __init__(self, train_data=None, test_data=None, co_occur_mat=None, tag2id={}, id2tag={}):
+        self.train_data = train_data
+        self.test_data = test_data
+        self.co_occur_mat = co_occur_mat
+        self.tag2id = tag2id
+        # if id2tag is None:
+        #     id2tag = {v: k for k, v in tag2id.items()}
+        self.id2tag = id2tag
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        return TrainTestData(data_dict.get('train_data'),
+                                 data_dict.get('test_data'),
+                                 data_dict.get('co_occur_mat'),
+                                 data_dict.get('tag2id'),
+                                 data_dict.get('id2tag'))
+
+    def to_dict(self):
+        data_dict = {
+            'train_data': self.train_data,
+            'test_data': self.test_data,
+            'co_occur_mat': self.co_occur_mat,
+            'tag2id': self.tag2id,
+            'id2tag': self.id2tag
+        }
+        return data_dict
+
+    def load(self, desc_file, tag_file):
+        data = []
+
+        desc_f = open(desc_file, newline='')
+        tag_f = open(tag_file, newline='')
+
+        desc_r = desc_f.readlines()
+        tag_r = tag_f.readlines()
+
+        assert len(desc_r) == len(tag_r)
+        data_size = len(desc_r)
+        for i in range(data_size):
+
+            dscp = desc_r[i]
+            dscp_tokens = tokenizer.tokenize(dscp.strip())[:510]
+            dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
+
+            tag = tag_r[i]
+            tag = tag.strip().split()
+            tag = [t for t in tag if t != '']
+
+            if len(tag) == 0:
+                continue
+
+            for t in tag:
+                if t not in self.tag2id:
+                    tag_id = len(self.tag2id)
+                    self.tag2id[t] = tag_id
+                    self.id2tag[tag_id] = t
+
+            tag_ids = [self.tag2id[t] for t in tag]
+
+            data.append({
+                'id': int(i),
+                'dscp_ids': dscp_ids,
+                'dscp_tokens': dscp_tokens,
+                'tag_ids': tag_ids,
+                'dscp': dscp
+            })
+
+        return data
+
+    def stat_cooccurence(self):
+
+        self.co_occur_mat = torch.zeros(size=(len(self.tag2id), len(self.tag2id)))
+        for i in range(len(self.train_data)):
+            tag_ids = self.train_data[i]['tag_ids']
+            for t1 in range(len(tag_ids)):
+                for t2 in range(len(tag_ids)):
+                    self.co_occur_mat[tag_ids[t1], tag_ids[t2]] += 1
+
+    def get_tags_num(self):
+        return len(self.tag2id)
+
+    def encode_tag(self):
+        tag_ids = []
+        tag_token_num = []
+        for i in range(self.get_tags_num()):
+            tag = self.id2tag[i]
+            tokens = tokenizer.tokenize(tag)
+            token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            tag_ids.append(token_ids)
+            tag_token_num.append(len(tokens))
+        max_num = max(tag_token_num)
+        padded_tag_ids = torch.zeros((self.get_tags_num(), max_num), dtype=torch.long)
+        mask = torch.zeros((self.get_tags_num(), max_num))
+        for i in range(self.get_tags_num()):
+            mask[i, :len(tag_ids[i])] = 1.
+            padded_tag_ids[i, :len(tag_ids[i])] = torch.tensor(tag_ids[i])
+        return padded_tag_ids, mask
+
+    def collate_fn(self, batch):
+        result = {}
+        # construct input
+
+        inputs = [e['dscp_ids'] for e in batch]  #e['title_ids'] +
+
+        lengths = np.array([len(e) for e in inputs])
+        max_len = np.max(lengths)
+        inputs = [tokenizer.prepare_for_model(e, max_length=max_len+2, pad_to_max_length=True) for e in inputs]
+
+        ids = torch.LongTensor([e['input_ids'] for e in inputs])
+        token_type_ids = torch.LongTensor([e['token_type_ids'] for e in inputs])
+        attention_mask = torch.FloatTensor([e['attention_mask'] for e in inputs])
+        # construct tag
+        tags = torch.zeros(size=(len(batch), self.get_tags_num()))
+        for i in range(len(batch)):
+            tags[i, batch[i]['tag_ids']] = 1.
+
+        dscp = [e['dscp'] for e in batch]
+
+        return (ids, token_type_ids, attention_mask), tags, dscp
+
+
+def load_TrainTestData(data_path):
+
+    cache_file_head = data_path.split("/")[-1]
+
+    if os.path.isfile(os.path.join('cache', cache_file_head + '.dataset')) \
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.encoded_tag')) \
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')):
+
+        print("load dataset from cache")
+
+        dataset = TrainTestData.from_dict(torch.load(os.path.join('cache', cache_file_head + '.dataset')))
+
         encoded_tag, tag_mask = torch.load(os.path.join('cache', cache_file_head + '.encoded_tag')), \
                                 torch.load(os.path.join('cache', cache_file_head + '.tag_mask'))
 
@@ -289,27 +446,27 @@ def load_dataset(all_data_file=None, net_csvfile=None):
         if not os.path.exists('cache'):
             os.makedirs('cache')
 
-        dataset = allDataObject.from_csv(all_data_file, net_csvfile)
+        dataset = TrainTestData()
+
+        desc_file = os.path.join(data_path, 'train_texts.txt')
+        tag_file = os.path.join(data_path, 'train_labels.txt')
+        dataset.train_data = dataset.load(desc_file, tag_file)
+
+        desc_file = os.path.join(data_path, 'test_texts.txt')
+        tag_file = os.path.join(data_path, 'test_labels.txt')
+        dataset.test_data = dataset.load(desc_file, tag_file)
+
+        dataset.stat_cooccurence()
+
+        print("The number of tags for training: {}".format(len(dataset.tag2id)))
+
+        torch.save(dataset.to_dict(), os.path.join('cache', cache_file_head + '.dataset'))
 
         encoded_tag, tag_mask = dataset.encode_tag()
-
         torch.save(encoded_tag, os.path.join('cache', cache_file_head + '.encoded_tag'))
         torch.save(tag_mask, os.path.join('cache', cache_file_head + '.tag_mask'))
 
-        data = np.array(dataset.data)
-        train_dataset = dataset
-        val_dataset = copy.copy(dataset)
-        ind = np.random.RandomState(seed=10).permutation(len(data))
-        split = int(len(data) * 0.85)
-        train_dataset.data = data[ind[:split]].tolist()
-        val_dataset.data = data[ind[split:]].tolist()
+    print("train_data_size: {}".format(len(dataset.train_data)))
+    print("val_data_size: {}".format(len(dataset.test_data)))
 
-        torch.save(train_dataset.to_dict(), os.path.join('cache', cache_file_head + '.train'))
-        torch.save(val_dataset.to_dict(), os.path.join('cache', cache_file_head + '.eval'))
-
-    print("train_data_size: {}".format(len(train_dataset.data)))
-    print("val_data_size: {}".format(len(val_dataset.data)))
-
-    tag_embedding_file = dataset.obtain_tag_embedding()
-
-    return train_dataset, val_dataset, encoded_tag, tag_mask
+    return dataset, encoded_tag, tag_mask

@@ -3,13 +3,10 @@ from engine import *
 from models import *
 from util import *
 from dataLoader import *
+from transformers import BertModel
 
 parser = argparse.ArgumentParser(description='Training Super-parameters')
-#
-# parser.add_argument('data_path', default='data/ProgrammerWeb/', type=str,
-#                     help='path to dataset (e.g. data/')
-# parser.add_argument('-num_classes', default=115, type=int, metavar='N',
-#                     help='number of domains')
+
 parser.add_argument('-seed', default=0, type=int, metavar='N',
                     help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
@@ -51,13 +48,26 @@ def multiLabel_text_classify():
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
-    train_dataset, val_dataset, encoded_tag, tag_mask = \
-        load_dataset('data/ProgrammerWeb/programweb-data.csv', 'data/ProgrammerWeb/domainnet.csv')
+    dataset, encoded_tag, tag_mask = load_allData('../../datasets/ProgrammerWeb/programweb-data.csv')
+
+    bert = BertModel.from_pretrained('bert-base-uncased')
 
     if args.model_type == 'GCNBert':
-        model = gcn_bert(num_classes=len(train_dataset.tag2id), t=0.4, co_occur_mat=train_dataset.co_occur_mat, bert_trainable=True)
+        model = GCNBert(bert, num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=co_occur_mat, bert_trainable=True)
     elif args.model_type == 'MLPBert':
-        model = mlp_bert(num_classes=len(train_dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
+        model = MLPBert(bert, num_classes=len(dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
+
+
+    def gcn_bert(num_classes, t, co_occur_mat=None, bert_trainable=True):
+
+        return
+
+    def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+        bert = BertModel.from_pretrained('bert-base-uncased')
+
+    def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+        bert = BertModel.from_pretrained('bert-base-uncased')
+        return MABert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)
 
 
     # define loss function (criterion)
@@ -70,16 +80,16 @@ def multiLabel_text_classify():
                                 weight_decay=args.weight_decay)
 
     state = {'batch_size': args.batch_size, 'max_epochs': args.epochs, 'evaluate': args.evaluate, 'resume': args.resume,
-             'num_classes': train_dataset.get_tags_num(), 'difficult_examples': False,
+             'num_classes': dataset.get_tags_num(), 'difficult_examples': False,
              'save_model_path': args.save_model_path, 'log_dir': args.log_dir, 'workers': args.workers,
              'epoch_step': args.epoch_step, 'lr': args.lr, 'encoded_tag': encoded_tag, 'tag_mask': tag_mask,
-             'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': train_dataset.id2tag}
+             'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': dataset.id2tag}
 
     if args.evaluate:
         state['evaluate'] = True
 
     engine = GCNMultiLabelMAPEngine(state)
-    engine.learning(model, criterion, train_dataset, val_dataset, optimizer)
+    engine.learning(model, criterion, dataset, optimizer)
 
 
 if __name__ == '__main__':

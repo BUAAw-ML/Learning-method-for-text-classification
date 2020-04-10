@@ -132,16 +132,16 @@ class Engine(object):
             self.state['loss'].backward()
             optimizer.step()
 
-    def learning(self, model, criterion, train_dataset, val_dataset, optimizer=None):
+    def learning(self, model, criterion, dataset, optimizer=None):
         # data loading code
-        train_loader = torch.utils.data.DataLoader(train_dataset,
+        train_loader = torch.utils.data.DataLoader(dataset.train_data,
                                                    batch_size=self.state['batch_size'], shuffle=False,
                                                    num_workers=self.state['workers'],
-                                                   collate_fn=train_dataset.collate_fn)
+                                                   collate_fn=dataset.collate_fn)
 
-        val_loader = torch.utils.data.DataLoader(val_dataset,
+        val_loader = torch.utils.data.DataLoader(dataset.test_data,
                                                  batch_size=self.state['batch_size'], shuffle=False,
-                                                 num_workers=self.state['workers'], collate_fn=val_dataset.collate_fn)
+                                                 num_workers=self.state['workers'], collate_fn=dataset.collate_fn)
 
         # optionally resume from a checkpoint
         if self._state('resume') is not None:
