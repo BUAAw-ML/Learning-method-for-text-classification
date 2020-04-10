@@ -9,8 +9,6 @@ import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
 
 from util import *
-from dataLoader import ProgramWebDataset
-
 import json
 
 tqdm.monitor_interval = 0
