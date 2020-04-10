@@ -1,14 +1,8 @@
 import math
 from urllib.request import urlretrieve
 import torch
-from PIL import Image
 from tqdm import tqdm
 import numpy as np
-import random
-import torch.nn.functional as F
-
-import json
-
 
 
 def download_url(url, destination=None, progress_bar=True):
@@ -207,6 +201,7 @@ class AveragePrecisionMeter(object):
         
         return OP, OR, OF1, CP, CR, CF1
 
+
 def gen_A(num_classes, t, co_occur_mat):
     import pickle
     _adj = co_occur_mat.numpy()
@@ -219,29 +214,13 @@ def gen_A(num_classes, t, co_occur_mat):
     _adj = _adj + np.identity(num_classes, np.int)
     return _adj
 
-# def gen_A(num_classes, t, co_occur_mat):
-#
-#     _adj = co_occur_mat.numpy()
-#
-#     # _adj[_adj < 0.01] = 0
-#     # _adj[_adj >= 0.01] = 1
-#     # _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
-#     # _adj = _adj + np.identity(num_classes, np.int)
-#     # _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
-#
-#     _adj = _adj / (_adj.sum(1, keepdims=True) + 1e-6)
-#     _adj = _adj + np.identity(num_classes, np.int)
-#
-#     # with open('adj.json', 'w') as f:
-#     #     json.dump(_adj, f)
-
-    return _adj
 
 def gen_adj(A):
     D = torch.pow(A.sum(1), -0.5)
     D = torch.diag(D)
     adj = torch.matmul(torch.matmul(A, D).t(), D)
     return adj
+
 
 def prepareData():
 

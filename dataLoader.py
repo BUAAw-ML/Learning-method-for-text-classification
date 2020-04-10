@@ -47,7 +47,8 @@ class allData(Dataset):
 
     @classmethod
     def from_csv(cls, data_path):
-        data, tag2id, id2tag, document, tag_based = allData.load_programWeb(data_path)
+        # data, tag2id, id2tag, document = allData.load_programWeb(data_path)
+        data, tag2id, id2tag, document = allData.load_news_group20(data_path)
 
         data = np.array(data)
         ind = np.random.RandomState(seed=10).permutation(len(data))
@@ -61,20 +62,68 @@ class allData(Dataset):
         return allData(train_data, test_data, co_occur_mat, tag2id, id2tag, tfidf_dict)
 
     @classmethod
+    def load_news_group20(cls, f):
+        data = []
+        tag2id = {}
+        id2tag = {}
+
+        document = []
+
+        with open(f, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader)
+            for row in reader:
+                if len(row) != 4:
+                    continue
+                id, index, tag, dscp = row
+
+                dscp_tokens = tokenizer.tokenize(dscp.strip())
+                if len(dscp_tokens) > 510:
+                    continue
+
+                document.append(" ".join(dscp_tokens))
+                dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
+
+                tag = tag.strip()
+                tag = [t for t in tag if t != '']
+
+                if len(tag) == 0:
+                    continue
+
+                for t in tag:
+                    if t not in tag2id:
+                        tag_id = len(tag2id)
+                        tag2id[t] = tag_id
+                        id2tag[tag_id] = t
+
+                tag_ids = [tag2id[t] for t in tag]
+
+                data.append({
+                    'id': int(id),
+                    'dscp_ids': dscp_ids,
+                    'dscp_tokens': dscp_tokens,
+                    'tag_ids': tag_ids,
+                    'dscp': dscp
+                })
+
+        print("The number of tags for training: {}".format(len(tag2id)))
+        os.makedirs('cache', exist_ok=True)
+
+        return data, tag2id, id2tag, document
+
+    @classmethod
     def load_programWeb(cls, f):
         data = []
         tag2id = {}
         id2tag = {}
 
-        tag2token = {}
-        tag_based = {}
-
         document = []
         tag_occurance = {}
+
         #csv.field_size_limit(500 * 1024 * 1024)
         #csv.field_size_limit(sys.maxsize)
         with open(f, newline='') as csvfile:
-            reader = csv.reader(csvfile)#, delimiter=',')
+            reader = csv.reader(csvfile)
             next(reader)
             for row in reader:
 
@@ -82,7 +131,7 @@ class allData(Dataset):
                     continue
                 _, _, _, tag = row
 
-                tag = tag.strip().split('###') # '###'
+                tag = tag.strip().split('###')
                 tag = [t for t in tag if t != '']
 
                 for t in tag:
@@ -98,7 +147,7 @@ class allData(Dataset):
         print(ignored_tags)
 
         with open(f, newline='') as csvfile:
-            reader = csv.reader(csvfile)#, delimiter=',')
+            reader = csv.reader(csvfile)
             next(reader)
             for row in reader:
                 if len(row) != 4:
@@ -146,7 +195,7 @@ class allData(Dataset):
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
 
-        return data, tag2id, id2tag, document, tag_based
+        return data, tag2id, id2tag, document
 
     @classmethod
     def get_tfidf_dict(cls, document):
@@ -162,7 +211,6 @@ class allData(Dataset):
             tfidf_dict[item] = tfidf_model.idf_[tfidf_model.vocabulary_[item]]
 
         return tfidf_dict
-
 
     @classmethod
     def stat_cooccurence(cls, data, tags_num):
