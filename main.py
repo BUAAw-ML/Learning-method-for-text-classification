@@ -5,6 +5,7 @@ from util import *
 from dataLoader import *
 from transformers import BertModel
 
+
 parser = argparse.ArgumentParser(description='Training Super-parameters')
 
 parser.add_argument('-seed', default=0, type=int, metavar='N',
@@ -41,34 +42,31 @@ parser.add_argument('--log_dir', default='./logs', type=str,
                     help='path to save log (default: none)')
 parser.add_argument('--model_type', default='MLPBert', type=str,
                     help='The type of model to train')
+parser.add_argument('--data_type', default='allData', type=str,
+                    help='The type of data')
 
 
 def multiLabel_text_classify():
-    global args, best_prec1, use_gpu
+
+    global args, use_gpu
     args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
-    dataset, encoded_tag, tag_mask = load_allData('../../datasets/ProgrammerWeb/programweb-data.csv')
+
+    if args.model_type == 'allData':
+        dataset, encoded_tag, tag_mask = load_allData('../../datasets/ProgrammerWeb/programweb-data.csv')
+
+    elif args.model_type == 'TrainTestData':
+        dataset, encoded_tag, tag_mask = load_TrainTestData('../../datasets/ProgrammerWeb/programweb-data.csv')
 
     bert = BertModel.from_pretrained('bert-base-uncased')
 
     if args.model_type == 'GCNBert':
-        model = GCNBert(bert, num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=co_occur_mat, bert_trainable=True)
+        model = GCNBert(bert, num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat, bert_trainable=True)
     elif args.model_type == 'MLPBert':
         model = MLPBert(bert, num_classes=len(dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
-
-
-    def gcn_bert(num_classes, t, co_occur_mat=None, bert_trainable=True):
-
-        return
-
-    def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
-        bert = BertModel.from_pretrained('bert-base-uncased')
-
-    def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
-        bert = BertModel.from_pretrained('bert-base-uncased')
-        return MABert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)
-
+    elif args.model_type == 'MABert':
+        model = MABert(bert, num_classes=len(dataset.tag2id), bert_trainable=True)
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()

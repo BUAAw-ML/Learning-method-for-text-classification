@@ -131,7 +131,7 @@ class MLPBert(nn.Module):
 
 
 class MABert(nn.Module):
-    def __init__(self, bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+    def __init__(self, bert, num_classes, bert_trainable=True):
         super(MABert, self).__init__()
 
         self.add_module('bert', bert)
