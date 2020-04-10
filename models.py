@@ -133,7 +133,7 @@ class MLPBert(nn.Module):
 
 class MABert(nn.Module):
     def __init__(self, bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
-        super(MLPBert, self).__init__()
+        super(MABert, self).__init__()
 
         self.add_module('bert', bert)
         if not bert_trainable:
@@ -155,15 +155,12 @@ class MABert(nn.Module):
         token_feat = self.bert(ids,
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0]
-        sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
-                        / torch.sum(attention_mask, dim=1, keepdim=True)
 
-        x = sentence_feat
-        for i in range(self.hidden_layer_num):
-            x = self.hidden_list[i](x)
-            x = self.act(x)
-        y = self.output(x)
-        return y
+        embed = self.bert.get_input_embeddings()
+        tag_embedding = embed(encoded_tag)
+        tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
+                        / torch.sum(tag_mask, dim=1, keepdim=True)
+
 
     def get_config_optim(self, lr, lrp):
         return [
