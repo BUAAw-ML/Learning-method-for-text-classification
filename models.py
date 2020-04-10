@@ -58,7 +58,7 @@ class GCNBert(nn.Module):
         self.relu = nn.LeakyReLU(0.2)
 
         _adj = gen_A(num_classes, t, co_occur_mat)
-        _adj = torch.FloatTensor(_adj)
+        _adj = torch.FloatTensor(_adj).transpose(0, 1)
         self.adj = nn.Parameter(gen_adj(_adj), requires_grad=False)
 
     def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
@@ -129,6 +129,48 @@ class MLPBert(nn.Module):
                 {'params': self.hidden_list.parameters(), 'lr': lr},
                 {'params': self.output.parameters(), 'lr': lr},
                 ]
+
+
+class MABert(nn.Module):
+    def __init__(self, bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+        super(MLPBert, self).__init__()
+
+        self.add_module('bert', bert)
+        if not bert_trainable:
+            for m in self.bert.parameters():
+                m.requires_grad = False
+
+        self.num_classes = num_classes
+        self.hidden_layer_num = hidden_layer_num
+        self.hidden_list = nn.ModuleList()
+        for i in range(hidden_layer_num):
+            if i == 0:
+                self.hidden_list.append(nn.Linear(768, hidden_dim))
+            else:
+                self.hidden_list.append(nn.Linear(hidden_dim, hidden_dim))
+        self.output = nn.Linear(hidden_dim, num_classes)
+        self.act = nn.ReLU()
+
+    def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
+        token_feat = self.bert(ids,
+                               token_type_ids=token_type_ids,
+                               attention_mask=attention_mask)[0]
+        sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
+                        / torch.sum(attention_mask, dim=1, keepdim=True)
+
+        x = sentence_feat
+        for i in range(self.hidden_layer_num):
+            x = self.hidden_list[i](x)
+            x = self.act(x)
+        y = self.output(x)
+        return y
+
+    def get_config_optim(self, lr, lrp):
+        return [
+            {'params': self.bert.parameters(), 'lr': lr * lrp},
+            {'params': self.hidden_list.parameters(), 'lr': lr},
+            {'params': self.output.parameters(), 'lr': lr},
+        ]
 
 
 def gcn_bert(num_classes, t, co_occur_mat=None, bert_trainable=True):
