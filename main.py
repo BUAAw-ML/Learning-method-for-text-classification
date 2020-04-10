@@ -54,7 +54,7 @@ def multiLabel_text_classify():
     use_gpu = torch.cuda.is_available()
 
     if args.data_type == 'allData':
-        dataset, encoded_tag, tag_mask = load_allData('../../datasets/news_group20/news_group20.csv')
+        dataset, encoded_tag, tag_mask = load_allData('../../datasets/news_group20/news_group20_1.csv')
         #../../datasets/news_group20/news_group20.csv
         #../../datasets/ProgrammerWeb/programweb-data.csv
 
