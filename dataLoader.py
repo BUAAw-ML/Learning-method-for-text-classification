@@ -420,6 +420,12 @@ class TrainTestData(Dataset):
                 'tag_ids': tag_ids,
                 'dscp': dscp
             })
+            print(dscp)
+            print(tag)
+            exit()
+
+        desc_f.close()
+        tag_f.close()
 
         return data
 
