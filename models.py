@@ -141,15 +141,6 @@ class MABert(nn.Module):
                 m.requires_grad = False
 
         self.num_classes = num_classes
-        self.hidden_layer_num = hidden_layer_num
-        self.hidden_list = nn.ModuleList()
-        for i in range(hidden_layer_num):
-            if i == 0:
-                self.hidden_list.append(nn.Linear(768, hidden_dim))
-            else:
-                self.hidden_list.append(nn.Linear(hidden_dim, hidden_dim))
-        self.output = nn.Linear(hidden_dim, num_classes)
-        self.act = nn.ReLU()
 
     def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
         token_feat = self.bert(ids,
@@ -161,6 +152,14 @@ class MABert(nn.Module):
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
                         / torch.sum(tag_mask, dim=1, keepdim=True)
 
+        masks = torch.unsqueeze(attention_mask, 1)  # N, 1, L
+        attention = (torch.matmul(token_feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(1 - masks.byte(), torch.tensor(-np.inf))
+        attention = F.softmax(attention, -1)
+        attention_out = attention @ token_feat   # N, labels_num, hidden_size
+
+        pred = torch.sum(attention_out, -1)
+
+        return pred
 
     def get_config_optim(self, lr, lrp):
         return [
@@ -178,3 +177,8 @@ def gcn_bert(num_classes, t, co_occur_mat=None, bert_trainable=True):
 def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
     bert = BertModel.from_pretrained('bert-base-uncased')
     return MLPBert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)
+
+
+def mlp_bert(num_classes, hidden_dim, hidden_layer_num, bert_trainable=True):
+    bert = BertModel.from_pretrained('bert-base-uncased')
+    return MABert(bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable)

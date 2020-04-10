@@ -175,20 +175,6 @@ class ProgramWebDataset(Dataset):
         return (ids, token_type_ids, attention_mask), tags, dscp
 
 
-# def CrossValidationSplitter(dataset, seed):
-#     data_len = len(dataset)  # 获取文件总数
-
-#     npr = np.random.RandomState(seed)
-
-#     data_index = npr.permutation(data_len)
-
-#     remainder = data_len % 10
-#     data_index = data_index[:-1 * remainder]
-#     data_index = np.array(data_index)
-#     data_block = data_index.reshape(10, -1)  # split the data into 10 groups
-#     return data_block
-
-
 def load_dataset(api_csvfile=None, net_csvfile=None):
 
     cache_file_head = api_csvfile.split("/")[-1]
