@@ -69,6 +69,8 @@ class allData(Dataset):
 
         document = []
 
+        #csv.field_size_limit(500 * 1024 * 1024)
+        csv.field_size_limit(sys.maxsize)
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile)
             next(reader)
@@ -120,8 +122,6 @@ class allData(Dataset):
         document = []
         tag_occurance = {}
 
-        #csv.field_size_limit(500 * 1024 * 1024)
-        #csv.field_size_limit(sys.maxsize)
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile)
             next(reader)
