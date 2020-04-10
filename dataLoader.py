@@ -15,7 +15,7 @@ from word_embedding import *
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 token_table = {'ecommerce': 'electronic commerce'}
 
-
+# All data in one excel
 class allData(Dataset):
     def __init__(self, train_data=None, test_data=None, co_occur_mat=None, tag2id=None, id2tag=None, tfidf_dict=None):
         self.train_data = train_data
@@ -352,6 +352,7 @@ def load_allData(data_path=None):
     return dataset, encoded_tag, tag_mask
 
 
+#Training and test data are in different files
 class TrainTestData(Dataset):
     def __init__(self, train_data=None, test_data=None, co_occur_mat=None, tag2id={}, id2tag={}):
         self.train_data = train_data

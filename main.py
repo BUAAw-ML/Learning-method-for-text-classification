@@ -51,7 +51,8 @@ parser.add_argument('--data_path', default='../../datasets/multiLabel_text_class
 #../../datasets/multiLabel_text_classification/ProgrammerWeb/programweb-data.csv
 #../../datasets/multiLabel_text_classification/EUR-Lex
 #reuters
-#
+#Yahoo! Answers Topic
+#DBPedia
 #
 
 def multiLabel_text_classify():
