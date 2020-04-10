@@ -340,6 +340,8 @@ def load_allData(data_path=None):
         dataset = allData.from_csv(data_path)
         torch.save(dataset.to_dict(), os.path.join('cache', cache_file_head + '.dataset'))
 
+        dataset.stat_cooccurence()
+
         encoded_tag, tag_mask = dataset.encode_tag()
         torch.save(encoded_tag, os.path.join('cache', cache_file_head + '.encoded_tag'))
         torch.save(tag_mask, os.path.join('cache', cache_file_head + '.tag_mask'))
@@ -420,9 +422,6 @@ class TrainTestData(Dataset):
                 'tag_ids': tag_ids,
                 'dscp': dscp
             })
-            print(dscp)
-            print(tag)
-            exit()
 
         desc_f.close()
         tag_f.close()
@@ -487,7 +486,7 @@ def load_TrainTestData(data_path):
 
     if os.path.isfile(os.path.join('cache', cache_file_head + '.dataset')) \
             and os.path.isfile(os.path.join('cache', cache_file_head + '.encoded_tag')) \
-            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')) and False:
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')):
 
         print("load dataset from cache")
 
@@ -512,8 +511,6 @@ def load_TrainTestData(data_path):
         desc_file = os.path.join(data_path, 'test_texts.txt')
         tag_file = os.path.join(data_path, 'test_labels.txt')
         dataset.test_data = dataset.load(desc_file, tag_file)
-
-        dataset.stat_cooccurence()
 
         print("The number of tags for training: {}".format(len(dataset.tag2id)))
 
