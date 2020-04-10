@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from transformers import BertModel
 from torch.autograd import Variable
+import torch.nn.functional as F
 
 class GraphConvolution(nn.Module):
     """
