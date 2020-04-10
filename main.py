@@ -22,7 +22,7 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=16, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
-parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.01, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--lrp', '--learning-rate-pretrained', default=0.1, type=float,
                     metavar='LR', help='learning rate for pre-trained layers')
@@ -54,9 +54,9 @@ def multiLabel_text_classify():
     use_gpu = torch.cuda.is_available()
 
     if args.data_type == 'allData':
-        dataset, encoded_tag, tag_mask = load_allData('../../datasets/news_group20/news_group20.csv')
-        #../../datasets/news_group20/news_group20.csv
-        #../../datasets/ProgrammerWeb/programweb-data.csv
+        dataset, encoded_tag, tag_mask = load_allData('../../datasets/multiClass_text_classification/news_group20/news_group20.csv')
+        #../../datasets/multiClass_text_classification/news_group20/news_group20.csv
+        #../../datasets/multiLabel_text_classification/ProgrammerWeb/programweb-data.csv
 
     elif args.data_type == 'TrainTestData':
         dataset, encoded_tag, tag_mask = load_TrainTestData('../../datasets/ProgrammerWeb/programweb-data.csv')
