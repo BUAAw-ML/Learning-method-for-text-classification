@@ -53,10 +53,10 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
 
-    if args.model_type == 'allData':
+    if args.data_type == 'allData':
         dataset, encoded_tag, tag_mask = load_allData('../../datasets/ProgrammerWeb/programweb-data.csv')
 
-    elif args.model_type == 'TrainTestData':
+    elif args.data_type == 'TrainTestData':
         dataset, encoded_tag, tag_mask = load_TrainTestData('../../datasets/ProgrammerWeb/programweb-data.csv')
 
     bert = BertModel.from_pretrained('bert-base-uncased')
