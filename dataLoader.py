@@ -35,7 +35,7 @@ class allData(Dataset):
                                  data_dict.get('id2tag'))
 
     @classmethod
-    def from_csv(cls, data_path, net_csvfile):
+    def from_csv(cls, data_path):
         data, tag2id, id2tag, document, tag_based = allData.load_programWeb(data_path)
 
         data = np.array(data)
