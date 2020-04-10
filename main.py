@@ -40,10 +40,17 @@ parser.add_argument('--save_model_path', default='./checkpoint', type=str,
                     help='path to save checkpoint (default: none)')
 parser.add_argument('--log_dir', default='./logs', type=str,
                     help='path to save log (default: none)')
-parser.add_argument('--model_type', default='MLPBert', type=str,
+parser.add_argument('--model_type', default='MABert', type=str,
                     help='The type of model to train')
 parser.add_argument('--data_type', default='allData', type=str,
                     help='The type of data')
+parser.add_argument('--data_path', default='../../datasets/multiLabel_text_classification/multiLabel_text_classification/EUR-Lex', type=str,
+                    help='path of data')
+
+#../../datasets/multiClass_text_classification/news_group20/news_group20.csv
+#../../datasets/multiLabel_text_classification/ProgrammerWeb/programweb-data.csv
+#../../datasets/multiLabel_text_classification/multiLabel_text_classification/EUR-Lex
+
 
 
 def multiLabel_text_classify():
@@ -53,13 +60,13 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
 
+    print("The type of model to train: {} \n Data path: {}".format(args.data_type, args.data_path))
+
     if args.data_type == 'allData':
-        dataset, encoded_tag, tag_mask = load_allData('../../datasets/multiClass_text_classification/news_group20/news_group20.csv')
-        #../../datasets/multiClass_text_classification/news_group20/news_group20.csv
-        #../../datasets/multiLabel_text_classification/ProgrammerWeb/programweb-data.csv
+        dataset, encoded_tag, tag_mask = load_allData(args.data_path)
 
     elif args.data_type == 'TrainTestData':
-        dataset, encoded_tag, tag_mask = load_TrainTestData('../../datasets/ProgrammerWeb/programweb-data.csv')
+        dataset, encoded_tag, tag_mask = load_TrainTestData(args.data_path)
 
     bert = BertModel.from_pretrained('bert-base-uncased')
 
