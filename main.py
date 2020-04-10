@@ -16,7 +16,7 @@ parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--epoch_step', default=[15], type=int, nargs='+',
                     help='number of epochs to change learning rate')
-parser.add_argument('--device_ids', default=[1], type=int, nargs='+',
+parser.add_argument('--device_ids', default=[0], type=int, nargs='+',
                     help='')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -50,7 +50,9 @@ parser.add_argument('--data_path', default='../../datasets/multiLabel_text_class
 #../../datasets/multiClass_text_classification/news_group20/news_group20.csv
 #../../datasets/multiLabel_text_classification/ProgrammerWeb/programweb-data.csv
 #../../datasets/multiLabel_text_classification/EUR-Lex
-
+#reuters
+#
+#
 
 def multiLabel_text_classify():
 
@@ -59,7 +61,7 @@ def multiLabel_text_classify():
 
     use_gpu = torch.cuda.is_available()
 
-    print("The type of model to train: {} \n Data path: {}".format(args.data_type, args.data_path))
+    print("The type of model to train: {} \nData path: {}".format(args.model_type, args.data_path))
 
     if args.data_type == 'allData':
         dataset, encoded_tag, tag_mask = load_allData(args.data_path)
