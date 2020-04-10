@@ -12,15 +12,15 @@ parser.add_argument('-seed', default=0, type=int, metavar='N',
                     help='random seed')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=50, type=int, metavar='N',
+parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
-parser.add_argument('--epoch_step', default=[60, 80], type=int, nargs='+',
+parser.add_argument('--epoch_step', default=[15], type=int, nargs='+',
                     help='number of epochs to change learning rate')
 parser.add_argument('--device_ids', default=[1], type=int, nargs='+',
                     help='')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=32, type=int,
+parser.add_argument('-b', '--batch-size', default=16, type=int,
                     metavar='N', help='mini-batch size (default: 256)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
@@ -40,7 +40,7 @@ parser.add_argument('--save_model_path', default='./checkpoint', type=str,
                     help='path to save checkpoint (default: none)')
 parser.add_argument('--log_dir', default='./logs', type=str,
                     help='path to save log (default: none)')
-parser.add_argument('--model_type', default='MLPBert', type=str,
+parser.add_argument('--model_type', default='MABert', type=str,
                     help='The type of model to train')
 parser.add_argument('--data_type', default='allData', type=str,
                     help='The type of data')
