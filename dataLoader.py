@@ -487,7 +487,7 @@ def load_TrainTestData(data_path):
 
     if os.path.isfile(os.path.join('cache', cache_file_head + '.dataset')) \
             and os.path.isfile(os.path.join('cache', cache_file_head + '.encoded_tag')) \
-            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')):
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')) and False:
 
         print("load dataset from cache")
 
