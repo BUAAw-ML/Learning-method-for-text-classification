@@ -48,13 +48,15 @@ class allData(Dataset):
     @classmethod
     def from_csv(cls, data_path):
         # data, tag2id, id2tag, document = allData.load_programWeb(data_path)
-        data, tag2id, id2tag, document = allData.load_news_group20(data_path)
+        data, zeroshot_data, tag2id, id2tag, document = allData.load_news_group20(data_path)
 
         data = np.array(data)
         ind = np.random.RandomState(seed=10).permutation(len(data))
-        split = int(len(data) * 0.85)
+        split = int(len(data) * 0.9)
         train_data = data[ind[:split]].tolist()
         test_data = data[ind[split:]].tolist()
+
+        test_data.append(zeroshot_data)
 
         co_occur_mat = allData.stat_cooccurence(data, len(tag2id))
         tfidf_dict = allData.get_tfidf_dict(document)
@@ -152,6 +154,7 @@ class allData(Dataset):
             reader = csv.reader(csvfile)
             next(reader)
             for row in reader:
+                zeroshot_data = False
                 if len(row) != 4:
                     continue
                 id, title, dscp, tag = row
@@ -169,39 +172,44 @@ class allData(Dataset):
                 tag = tag.strip().split('###')
                 tag = [t for t in tag if t != '']
 
+                if len(tag) == 0:
+                    continue
+
                 # if ignored_tags is not None:
                 #     tag = [t for t in tag if t not in ignored_tags]
 
                 tt = []
                 for t in tag:
-                    if t  not in ignored_tags:
+                    if t not in ignored_tags:
                         tt.append(t)
                     else:
+                        tag2 = tag
+                        zeroshot_data = True
+                tag = tt
 
                 # if len(set(tag)) < 2:
                 #     continue
 
-                if len(tag) == 0:
-                    continue
-
-                for t in tag:
+                for t in tag2:
                     if t not in tag2id:
                         tag_id = len(tag2id)
                         tag2id[t] = tag_id
                         id2tag[tag_id] = t
 
-                tag_ids = [tag2id[t] for t in tag]
+                if len(tag) != 0:
 
-                data.append({
-                    'id': int(id),
-                    'dscp_ids': title_ids + dscp_ids,
-                    'dscp_tokens': title_tokens + dscp_tokens,
-                    'tag_ids': tag_ids,
-                    'dscp': dscp
-                })
+                    tag_ids = [tag2id[t] for t in tag]
 
+                    data.append({
+                        'id': int(id),
+                        'dscp_ids': title_ids + dscp_ids,
+                        'dscp_tokens': title_tokens + dscp_tokens,
+                        'tag_ids': tag_ids,
+                        'dscp': dscp
+                    })
 
-                if
+                if zeroshot_data:
+                    tag_ids = [tag2id[t] for t in tag2]
                     zeroshot_data.append({
                         'id': int(id),
                         'dscp_ids': title_ids + dscp_ids,
@@ -210,11 +218,10 @@ class allData(Dataset):
                         'dscp': dscp
                     })
 
-
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
 
-        return data, tag2id, id2tag, document
+        return data, zeroshot_data, tag2id, id2tag, document
 
     @classmethod
     def get_tfidf_dict(cls, document):
