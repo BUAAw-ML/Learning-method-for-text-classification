@@ -116,6 +116,7 @@ class allData(Dataset):
     @classmethod
     def load_programWeb(cls, f):
         data = []
+        zeroshot_data = []
         tag2id = {}
         id2tag = {}
 
@@ -139,9 +140,10 @@ class allData(Dataset):
                         tag_occurance[t] = 1
                     tag_occurance[t] += 1
 
-        ignored_tags = set(['Tools','Applications','Other', 'API', 'Software-as-a-Service','Platform-as-a-Service','Data-as-a-Service'])  #
+        ignored_tags = set()
+        # ignored_tags = set(['Tools','Applications','Other', 'API', 'Software-as-a-Service','Platform-as-a-Service','Data-as-a-Service'])  #
         for tag in tag_occurance:
-            if tag_occurance[tag] < 0:
+            if tag_occurance[tag] < 100:
                 ignored_tags.add(tag)
 
         print(ignored_tags)
@@ -167,8 +169,14 @@ class allData(Dataset):
                 tag = tag.strip().split('###')
                 tag = [t for t in tag if t != '']
 
-                if ignored_tags is not None:
-                    tag = [t for t in tag if t not in ignored_tags]
+                # if ignored_tags is not None:
+                #     tag = [t for t in tag if t not in ignored_tags]
+
+                tt = []
+                for t in tag:
+                    if t  not in ignored_tags:
+                        tt.append(t)
+                    else:
 
                 # if len(set(tag)) < 2:
                 #     continue
@@ -191,6 +199,17 @@ class allData(Dataset):
                     'tag_ids': tag_ids,
                     'dscp': dscp
                 })
+
+
+                if
+                    zeroshot_data.append({
+                        'id': int(id),
+                        'dscp_ids': title_ids + dscp_ids,
+                        'dscp_tokens': title_tokens + dscp_tokens,
+                        'tag_ids': tag_ids,
+                        'dscp': dscp
+                    })
+
 
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
