@@ -8,8 +8,8 @@ import torchnet as tnt
 import torch.nn as nn
 # from torch.utils.tensorboard import SummaryWriter
 
-import tensorflow as tf
-import tf.summary.FileWriter as SFW
+
+import tensorflow.summary.FileWriter as SFW
 
 from util import *
 import json
