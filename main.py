@@ -44,7 +44,7 @@ parser.add_argument('--model_type', default='MABert', type=str,
                     help='The type of model to train')
 parser.add_argument('--data_type', default='TrainTestData', type=str,
                     help='The type of data')
-parser.add_argument('--data_path', default='../../datasets/multiLabel_text_classification/EUR-Lex', type=str,
+parser.add_argument('--data_path', default='../datasets/ProgrammerWeb/programweb-data.csv', type=str,
                     help='path of data')
 
 #../../datasets/multiClass_text_classification/news_group20/news_group20.csv
