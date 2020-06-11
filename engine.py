@@ -6,7 +6,10 @@ import torch.optim
 import torch.utils.data
 import torchnet as tnt
 import torch.nn as nn
-from torch.utils.tensorboard import summary.FileWriter
+# from torch.utils.tensorboard import SummaryWriter
+
+import tensorflow as tf
+import tf.summary.FileWriter as SFW
 
 from util import *
 import json
@@ -16,7 +19,7 @@ tqdm.monitor_interval = 0
 
 class Engine(object):
     def __init__(self, state={}):
-        self.writer = summary.FileWriter(state['log_dir'])
+        self.writer = SFW(state['log_dir'])
         os.makedirs(state['log_dir'], exist_ok=True)
         self.state = state
         if self._state('use_gpu') is None:
