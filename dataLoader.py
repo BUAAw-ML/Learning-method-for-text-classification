@@ -198,6 +198,7 @@ class allData(Dataset):
 
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
+        print("makedir")
 
         return data, tag2id, id2tag, document
 
