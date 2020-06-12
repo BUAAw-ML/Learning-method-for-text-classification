@@ -47,8 +47,8 @@ class allData(Dataset):
 
     @classmethod
     def from_csv(cls, data_path):
-        # data, tag2id, id2tag, document = allData.load_programWeb(data_path)
-        data, tag2id, id2tag, document = allData.load_news_group20(data_path)
+        data, tag2id, id2tag, document = allData.load_programWeb(data_path)
+        # data, tag2id, id2tag, document = allData.load_news_group20(data_path)
 
         data = np.array(data)
         ind = np.random.RandomState(seed=10).permutation(len(data))
@@ -143,7 +143,7 @@ class allData(Dataset):
         ignored_tags = set()
         # ignored_tags = set(['Tools','Applications','Other', 'API', 'Software-as-a-Service','Platform-as-a-Service','Data-as-a-Service'])  #
         for tag in tag_occurance:
-            if tag_occurance[tag] < 100:
+            if tag_occurance[tag] < 0:
                 ignored_tags.add(tag)
 
         print(ignored_tags)
@@ -345,7 +345,7 @@ def load_allData(data_path=None):
         dataset = allData.from_csv(data_path)
         torch.save(dataset.to_dict(), os.path.join('cache', cache_file_head + '.dataset'))
 
-        dataset.stat_cooccurence()
+        # dataset.stat_cooccurence()
 
         encoded_tag, tag_mask = dataset.encode_tag()
         torch.save(encoded_tag, os.path.join('cache', cache_file_head + '.encoded_tag'))
