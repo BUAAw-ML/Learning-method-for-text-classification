@@ -26,6 +26,7 @@ class allData(Dataset):
             id2tag = {v: k for k, v in tag2id.items()}
         self.id2tag = id2tag
         self.tfidf_dict = tfidf_dict
+        self.tag_weight = []
 
     @classmethod
     def from_dict(cls, data_dict):
@@ -47,7 +48,7 @@ class allData(Dataset):
 
     @classmethod
     def from_csv(cls, data_path):
-        data, tag2id, id2tag, document = allData.load_programWeb(data_path)
+        data, tag2id, id2tag, document = load_programWeb(data_path)
         # data, tag2id, id2tag, document = allData.load_news_group20(data_path)
 
         data = np.array(data)
@@ -113,10 +114,8 @@ class allData(Dataset):
 
         return data, tag2id, id2tag, document
 
-    tag_weight = []
-
-    @classmethod
-    def load_programWeb(cls, f):
+    # @classmethod
+    def load_programWeb(self, f):
         data = []
         zeroshot_data = []
         tag2id = {}
@@ -202,12 +201,10 @@ class allData(Dataset):
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
 
-        global tag_weight
-
         for id in range(len(id2tag)):
-            tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
+            self.tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
 
-        print(tag_weight)
+        print(self.tag_weight)
 
         return data, tag2id, id2tag, document
 
