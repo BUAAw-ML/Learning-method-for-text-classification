@@ -113,6 +113,8 @@ class allData(Dataset):
 
         return data, tag2id, id2tag, document
 
+    tag_weight = []
+
     @classmethod
     def load_programWeb(cls, f):
         data = []
@@ -147,6 +149,7 @@ class allData(Dataset):
                 ignored_tags.add(tag)
 
         print(ignored_tags)
+
 
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile)
@@ -198,7 +201,13 @@ class allData(Dataset):
 
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
-        print("makedir")
+
+        global tag_weight
+
+        for id in len(id2tag):
+            tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
+
+        print(tag_weight)
 
         return data, tag2id, id2tag, document
 
@@ -327,7 +336,7 @@ def load_allData(data_path=None):
 
     if os.path.isfile(os.path.join('cache', cache_file_head + '.dataset')) \
             and os.path.isfile(os.path.join('cache', cache_file_head + '.encoded_tag')) \
-            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')):
+            and os.path.isfile(os.path.join('cache', cache_file_head + '.tag_mask')) and False:
 
         print("load dataset from cache")
 
