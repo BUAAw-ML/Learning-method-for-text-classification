@@ -48,7 +48,7 @@ class allData(Dataset):
 
     @classmethod
     def from_csv(cls, data_path):
-        data, tag2id, id2tag, document = load_programWeb(data_path)
+        data, tag2id, id2tag, document = allData.load_programWeb(data_path)
         # data, tag2id, id2tag, document = allData.load_news_group20(data_path)
 
         data = np.array(data)
