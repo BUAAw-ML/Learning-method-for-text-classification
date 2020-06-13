@@ -322,7 +322,7 @@ class allData(Dataset):
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1.
             print(type(tags[i]))
-            print(type(allData.tag_weight))
+            print(type(torch.from_numpy(np.array(allData.tag_weight))))
             tags[i] *= torch.from_numpy(np.array(allData.tag_weight))
 
         dscp = [e['dscp'] for e in batch]
