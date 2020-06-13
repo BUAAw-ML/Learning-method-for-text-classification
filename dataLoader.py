@@ -321,7 +321,7 @@ class allData(Dataset):
         tags = torch.zeros(size=(len(batch), self.get_tags_num()))
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1.
-            tags[i] *= np.array(allData.tag_weight)
+            tags[i] *= torch.from_numpy(np.array(allData.tag_weight))
 
         dscp = [e['dscp'] for e in batch]
 
