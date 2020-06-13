@@ -204,7 +204,7 @@ class allData(Dataset):
         # global tag_weight
 
         for id in range(len(id2tag)):
-            allData.tag_weight.append(1 + 10. / tag_occurance[id2tag[id]])
+            allData.tag_weight.append(1 + 50. / tag_occurance[id2tag[id]])
         print(allData.tag_weight)
 
         return data, tag2id, id2tag, document
