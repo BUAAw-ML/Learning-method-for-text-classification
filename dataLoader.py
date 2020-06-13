@@ -26,7 +26,6 @@ class allData(Dataset):
             id2tag = {v: k for k, v in tag2id.items()}
         self.id2tag = id2tag
         self.tfidf_dict = tfidf_dict
-        self.tag_weight = []
 
     @classmethod
     def from_dict(cls, data_dict):
@@ -114,8 +113,10 @@ class allData(Dataset):
 
         return data, tag2id, id2tag, document
 
-    # @classmethod
-    def load_programWeb(self, f):
+    tag_weight = []
+
+    @classmethod
+    def load_programWeb(cls, f):
         data = []
         zeroshot_data = []
         tag2id = {}
@@ -148,7 +149,6 @@ class allData(Dataset):
                 ignored_tags.add(tag)
 
         print(ignored_tags)
-
 
         with open(f, newline='') as csvfile:
             reader = csv.reader(csvfile)
@@ -197,14 +197,16 @@ class allData(Dataset):
                     'dscp': dscp
                 })
 
-
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
 
-        for id in range(len(id2tag)):
-            self.tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
+        global tag_weight
 
-        print(self.tag_weight)
+        for id in range(len(id2tag)):
+            tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
+
+        print(tag_weight)
+        exit()
 
         return data, tag2id, id2tag, document
 
