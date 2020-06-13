@@ -17,6 +17,7 @@ token_table = {'ecommerce': 'electronic commerce'}
 
 # All data in one excel
 class allData(Dataset):
+    tag_weight = []
     def __init__(self, train_data=None, test_data=None, co_occur_mat=None, tag2id=None, id2tag=None, tfidf_dict=None):
         self.train_data = train_data
         self.test_data = test_data
@@ -113,7 +114,7 @@ class allData(Dataset):
 
         return data, tag2id, id2tag, document
 
-    tag_weight = []
+
 
     @classmethod
     def load_programWeb(cls, f):
@@ -200,12 +201,12 @@ class allData(Dataset):
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
 
-        global tag_weight
+        # global tag_weight
 
         for id in range(len(id2tag)):
-            tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
+            allData.tag_weight.append(1 + 1. / tag_occurance[id2tag[id]])
 
-        print(tag_weight)
+        print(allData.tag_weight)
         exit()
 
         return data, tag2id, id2tag, document
