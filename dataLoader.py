@@ -318,11 +318,9 @@ class allData(Dataset):
         token_type_ids = torch.LongTensor([e['token_type_ids'] for e in inputs])
         attention_mask = torch.FloatTensor([e['attention_mask'] for e in inputs])
         # construct tag
-        tags = torch.zeros(size=(len(batch), self.get_tags_num()))
+        tags = torch.zeros(size=(len(batch), self.get_tags_num()), dtype=torch.float)
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1.
-            print(type(tags[i]))
-            print(type(torch.from_numpy(np.array(allData.tag_weight))))
             tags[i] *= torch.from_numpy(np.array(allData.tag_weight))
 
         dscp = [e['dscp'] for e in batch]
