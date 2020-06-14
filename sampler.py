@@ -28,7 +28,7 @@ class MultilabelBalancedRandomSampler(Sampler):
                 "cycle": the sampler cycles through the classes sequentially.
         """
 
-        self.labels = np.zeros(size=(len(train_data), 115))
+        self.labels = np.zeros(shape=(len(train_data), 115))
         for i in range(len(train_data)):
             self.labels[i, train_data[i]['tag_ids']] = 1.
 
