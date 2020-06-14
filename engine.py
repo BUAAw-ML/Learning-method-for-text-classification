@@ -7,7 +7,7 @@ import torch.utils.data
 import torchnet as tnt
 import torch.nn as nn
 from torch.utils.tensorboard import SummaryWriter
-from torchsampler import ImbalancedDatasetSampler
+from sampler import MultilabelBalancedRandomSampler
 
 import tensorflow as tf
 
@@ -135,7 +135,13 @@ class Engine(object):
 
     def learning(self, model, criterion, dataset, optimizer=None):
         # data loading code
+        train_idx = list(range(len(dataset.train_data)))
+        print(dataset.train_data.tag_ids)
+        exit()
+        train_sampler = MultilabelBalancedRandomSampler(dataset.train_data.tag_ids, train_idx)
+
         train_loader = torch.utils.data.DataLoader(dataset.train_data,
+                                                   sampler=train_sampler,
                                                    batch_size=self.state['batch_size'], shuffle=False,
                                                    num_workers=self.state['workers'],
                                                    collate_fn=dataset.collate_fn)
