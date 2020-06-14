@@ -136,6 +136,7 @@ class Engine(object):
     def learning(self, model, criterion, dataset, optimizer=None):
         # data loading code
         train_idx = list(range(len(dataset.train_data)))
+        print(np.array(dataset.train_data).shape())
         print(np.array(dataset.train_data)[:, 3, :])
         exit()
         train_sampler = MultilabelBalancedRandomSampler(dataset.train_data.tag_ids, train_idx)
