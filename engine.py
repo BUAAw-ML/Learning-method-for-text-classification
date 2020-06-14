@@ -136,7 +136,6 @@ class Engine(object):
     def learning(self, model, criterion, dataset, optimizer=None):
         # data loading code
         train_loader = torch.utils.data.DataLoader(dataset.train_data,
-                                                   sampler=ImbalancedDatasetSampler(dataset.train_data),
                                                    batch_size=self.state['batch_size'], shuffle=False,
                                                    num_workers=self.state['workers'],
                                                    collate_fn=dataset.collate_fn)
