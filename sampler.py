@@ -15,7 +15,7 @@ class MultilabelBalancedRandomSampler(Sampler):
     will have at least batch_size / n_classes samples as batch_size approaches infinity
     """
 
-    def __init__(self, labels, indices=None, class_choice="random"):
+    def __init__(self, train_data, class_choice="random"):
         """
         Parameters:
         -----------
@@ -27,10 +27,13 @@ class MultilabelBalancedRandomSampler(Sampler):
                 "random": class is chosen uniformly at random.
                 "cycle": the sampler cycles through the classes sequentially.
         """
-        self.labels = labels
-        self.indices = indices
-        if self.indices is None:
-            self.indices = range(len(labels))
+
+        self.labels = np.zeros(size=(len(train_data), 115))
+        for i in range(len(train_data)):
+            self.labels[i, train_data[i]['tag_ids']] = 1.
+
+        self.indices = list(range(len(train_data)))
+
         self.map = []
         for class_ in range(self.labels.shape[1]):
             lst = np.where(self.labels[:, class_] == 1)[0]
