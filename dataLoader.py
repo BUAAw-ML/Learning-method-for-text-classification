@@ -204,7 +204,7 @@ class allData(Dataset):
         # global tag_weight
 
         for id in range(len(id2tag)):
-            allData.tag_weight.append(1 + 5. / tag_occurance[id2tag[id]])
+            allData.tag_weight.append(1 + 2. / tag_occurance[id2tag[id]])
         print(allData.tag_weight)
 
         return data, tag2id, id2tag, document
@@ -324,8 +324,6 @@ class allData(Dataset):
             tags[i, batch[i]['tag_ids']] = 1.
             tags[i] *= torch.from_numpy(np.array(allData.tag_weight)).float()
 
-        print(tags)
-        exit()
         dscp = [e['dscp'] for e in batch]
 
         return (ids, token_type_ids, attention_mask), tags, dscp
