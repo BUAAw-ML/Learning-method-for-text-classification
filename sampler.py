@@ -15,7 +15,7 @@ class MultilabelBalancedRandomSampler(Sampler):
     will have at least batch_size / n_classes samples as batch_size approaches infinity
     """
 
-    def __init__(self, train_data, class_choice="random"):
+    def __init__(self, train_data, class_choice="cycle"):
         """
         Parameters:
         -----------
