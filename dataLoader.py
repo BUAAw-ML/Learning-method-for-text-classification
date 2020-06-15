@@ -204,7 +204,10 @@ class allData(Dataset):
         # global tag_weight
 
         for id in range(len(id2tag)):
-            allData.tag_weight.append(1 + 2.5 / tag_occurance[id2tag[id]])
+            if tag_occurance[id2tag[id]] < 100:
+                allData.tag_weight.append(2)
+            else:
+                allData.tag_weight.append(1)
         print(allData.tag_weight)
 
         return data, tag2id, id2tag, document
