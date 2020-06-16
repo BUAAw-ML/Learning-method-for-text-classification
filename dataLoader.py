@@ -201,11 +201,9 @@ class allData(Dataset):
         print("The number of tags for training: {}".format(len(tag2id)))
         os.makedirs('cache', exist_ok=True)
 
-        # global tag_weight
-
-        # for id in range(len(id2tag)):
+        for id in range(len(id2tag)):
         #     if tag_occurance[id2tag[id]] < 200:
-        allData.tag_weight.append(1 + 3.0 / tag_occurance[id2tag[id]])
+            allData.tag_weight.append(1 + 3.0 / tag_occurance[id2tag[id]])
             # else:
             #     allData.tag_weight.append(1)
         print(allData.tag_weight)
