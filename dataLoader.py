@@ -202,10 +202,10 @@ class allData(Dataset):
         os.makedirs('cache', exist_ok=True)
 
         for id in range(len(id2tag)):
-        #     if tag_occurance[id2tag[id]] < 200:
-            allData.tag_weight.append(1 + 1.0 / tag_occurance[id2tag[id]])
-            # else:
-            #     allData.tag_weight.append(1)
+            if tag_occurance[id2tag[id]] < 200:
+                allData.tag_weight.append(1 + 5.0 / tag_occurance[id2tag[id]])
+            else:
+                allData.tag_weight.append(1)
         print(allData.tag_weight)
 
         return data, tag2id, id2tag, document
