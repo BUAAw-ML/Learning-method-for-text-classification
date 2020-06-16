@@ -60,7 +60,7 @@ class allData(Dataset):
         co_occur_mat = allData.stat_cooccurence(data, len(tag2id))
         tfidf_dict = allData.get_tfidf_dict(document)
 
-        return allData(train_data, test_data, co_occur_mat, tag2id, id2tag, tfidf_dict)
+        return allData(train_data, test_data, co_occur_mat, tag2id, id2tag, tfidf_dict), allData.tag_weight
 
     @classmethod
     def load_news_group20(cls, f):
@@ -203,11 +203,11 @@ class allData(Dataset):
 
         # global tag_weight
 
-        for id in range(len(id2tag)):
-            if tag_occurance[id2tag[id]] < 200:
-                allData.tag_weight.append(1 + 3 / tag_occurance[id2tag[id]])
-            else:
-                allData.tag_weight.append(1)
+        # for id in range(len(id2tag)):
+        #     if tag_occurance[id2tag[id]] < 200:
+        allData.tag_weight.append(1 + 3.0 / tag_occurance[id2tag[id]])
+            # else:
+            #     allData.tag_weight.append(1)
         print(allData.tag_weight)
 
         return data, tag2id, id2tag, document
@@ -325,7 +325,7 @@ class allData(Dataset):
         tags = torch.zeros(size=(len(batch), self.get_tags_num()))
         for i in range(len(batch)):
             tags[i, batch[i]['tag_ids']] = 1.
-            tags[i] *= torch.from_numpy(np.array(allData.tag_weight)).float()
+            # tags[i] *= torch.from_numpy(np.array(allData.tag_weight)).float()
 
         dscp = [e['dscp'] for e in batch]
 
@@ -353,7 +353,7 @@ def load_allData(data_path=None):
         if not os.path.exists('cache'):
             os.makedirs('cache')
 
-        dataset = allData.from_csv(data_path)
+        dataset, tag_weight = allData.from_csv(data_path)
         torch.save(dataset.to_dict(), os.path.join('cache', cache_file_head + '.dataset'))
 
         # dataset.stat_cooccurence()
@@ -367,7 +367,7 @@ def load_allData(data_path=None):
 
     # tag_embedding_file = dataset.obtain_tag_embedding()
 
-    return dataset, encoded_tag, tag_mask
+    return dataset, encoded_tag, tag_mask, tag_weight
 
 
 #Training and test data are in different files

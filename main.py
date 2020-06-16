@@ -65,7 +65,7 @@ def multiLabel_text_classify():
     print("The type of model to train: {} \nData path: {}".format(args.model_type, args.data_path))
 
     if args.data_type == 'allData':
-        dataset, encoded_tag, tag_mask = load_allData(args.data_path)
+        dataset, encoded_tag, tag_mask, tag_weight = load_allData(args.data_path)
 
     elif args.data_type == 'TrainTestData':
         dataset, encoded_tag, tag_mask = load_TrainTestData(args.data_path)
@@ -80,7 +80,7 @@ def multiLabel_text_classify():
         model = MABert(bert, num_classes=len(dataset.tag2id), bert_trainable=True)
 
     # define loss function (criterion)
-    criterion = nn.MultiLabelSoftMarginLoss()
+    criterion = nn.MultiLabelSoftMarginLoss(weight=torch.from_numpy(np.array(tag_weight)).float().cuda(0))
 
     # define optimizer
     optimizer = torch.optim.SGD(model.get_config_optim(args.lr, args.lrp),
