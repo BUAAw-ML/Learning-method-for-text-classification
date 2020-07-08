@@ -143,6 +143,9 @@ class MABert(nn.Module):
 
         self.num_classes = num_classes
 
+        self.class_weight = Parameter(torch.Tensor(num_classes, 768).uniform_(0, 1), requires_grad=False).cuda(0) #
+        self.class_weight.requires_grad = True
+
     def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
         token_feat = self.bert(ids,
                                token_type_ids=token_type_ids,
@@ -157,7 +160,7 @@ class MABert(nn.Module):
         attention = (torch.matmul(token_feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(1 - masks.byte(), torch.tensor(-np.inf))
         attention = F.softmax(attention, -1)
         attention_out = attention @ token_feat   # N, labels_num, hidden_size
-
+        attention_out = attention_out * self.class_weight
         pred = torch.sum(attention_out, -1)
 
         return pred
@@ -165,6 +168,7 @@ class MABert(nn.Module):
     def get_config_optim(self, lr, lrp):
         return [
             {'params': self.bert.parameters(), 'lr': lr * lrp},
+            {'params': self.class_weight, 'lr': lr},
         ]
 
 
