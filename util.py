@@ -205,6 +205,7 @@ class AveragePrecisionMeter(object):
 def gen_A(num_classes, t, co_occur_mat):
     import pickle
     _adj = co_occur_mat.numpy()
+    print("the number of directed edges in the graph: {}".format(np.sum(_adj >= t) - num_classes))
     _nums = _adj.diagonal()
     _nums = _nums[:, np.newaxis]
     _adj = _adj / _nums

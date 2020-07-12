@@ -526,8 +526,6 @@ def load_TrainTestData(data_path):
         tag_file = os.path.join(data_path, 'test_labels.txt')
         dataset.test_data = dataset.load(desc_file, tag_file)
 
-        print("The number of tags for training: {}".format(len(dataset.tag2id)))
-
         torch.save(dataset.to_dict(), os.path.join('cache', cache_file_head + '.dataset'))
 
         encoded_tag, tag_mask = dataset.encode_tag()
