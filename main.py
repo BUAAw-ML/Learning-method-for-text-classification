@@ -80,7 +80,7 @@ def multiLabel_text_classify():
         model = MABert(bert, num_classes=len(dataset.tag2id), bert_trainable=True)
 
     # define loss function (criterion)
-    criterion = nn.MultiLabelSoftMarginLoss(weight=torch.from_numpy(np.array(tag_weight)).float().cuda(0))
+    criterion = nn.MultiLabelSoftMarginLoss() #weight=torch.from_numpy(np.array(tag_weight)).float().cuda(0)
 
     # define optimizer
     optimizer = torch.optim.SGD(model.get_config_optim(args.lr, args.lrp),
