@@ -126,7 +126,7 @@ class MLPBert(nn.Module):
     
     def get_config_optim(self, lr, lrp):
         return [
-                {'params': self.bert.parameters(), 'lr': lr * lrp},
+                {'params': self.bert.parameters(), 'lr': lrp},
                 {'params': self.hidden_list.parameters(), 'lr': lr},
                 {'params': self.output.parameters(), 'lr': lr},
                 ]
