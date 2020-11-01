@@ -171,4 +171,71 @@ class MABert(nn.Module):
             {'params': self.class_weight, 'lr': lr},
         ]
 
+class GANBert(nn.Module):
+    def __init__(self, bert, num_classes, hidden_dim, hidden_layer_num, bert_trainable=True, num_hidden_discriminator=1, hidden_dim_discriminator = 2000):
+        super(GANBert, self).__init__()
+
+        self.num_classes = num_classes
+
+        #Defining Bert
+        self.add_module('bert', bert)
+        if not bert_trainable:
+            for m in self.bert.parameters():
+                m.requires_grad = False
+
+        ###Define Discriminator
+
+        layer_hidden = tf.nn.dropout(x, keep_prob=dkp)
+        for i in range(num_hidden_discriminator):
+            layer_hidden = tf.layers.dense(layer_hidden, d_hidden_size)
+            layer_hidden = tf.nn.leaky_relu(layer_hidden)
+            layer_hidden = tf.nn.dropout(layer_hidden, keep_prob=dkp)
+        flatten5 = layer_hidden
+
+        logit = tf.layers.dense(layer_hidden, (num_labels + 1))
+        prob = tf.nn.softmax(logit)
+
+        self.num_hidden_discriminator = num_hidden_discriminator
+        self.hidden_list_discriminator = nn.ModuleList()
+        for i in range(num_hidden_discriminator):
+            input_dim = 768 if i == 0 else hidden_dim_discriminator
+            self.hidden_list_discriminator.append(nn.Linear(input_dim, hidden_dim_discriminator))
+        self.output = nn.softmax(nn.Linear(hidden_dim_discriminator, (num_classes + 1)))
+
+        ###Define Generator
+
+        layer_hidden = z
+
+        for i in range(num_hidden_generator):
+            layer_hidden = tf.layers.dense(layer_hidden, g_hidden_size)
+            layer_hidden = tf.nn.leaky_relu(layer_hidden)
+            layer_hidden = tf.nn.dropout(layer_hidden, rate=1 - dkp)
+        layer_hidden = tf.layers.dense(layer_hidden, g_hidden_size)
+
+
+    def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask):
+        token_feat = self.bert(ids,
+                               token_type_ids=token_type_ids,
+                               attention_mask=attention_mask)[0]
+        sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
+                        / torch.sum(attention_mask, dim=1, keepdim=True)
+
+        #Discriminator
+        x = sentence_feat
+        for i in range(self.hidden_layer_num):
+            x = self.hidden_list[i](x)
+            x = self.act(x)
+        y = self.output(x)
+        return y
+
+        #Generator
+
+
+
+    def get_config_optim(self, lr, lrp):
+        return [
+            {'params': self.bert.parameters(), 'lr': lrp},
+            {'params': self.hidden_list.parameters(), 'lr': lr},
+            {'params': self.output.parameters(), 'lr': lr},
+        ]
 
