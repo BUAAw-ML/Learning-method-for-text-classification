@@ -64,41 +64,41 @@ def multiLabel_text_classify():
 
     print("The type of model to train: {} \nData path: {}".format(args.model_type, args.data_path))
 
-    if args.data_type == 'allData':
-        dataset, encoded_tag, tag_mask, tag_weight = load_allData(args.data_path)
-
-    elif args.data_type == 'TrainTestData':
-        dataset, encoded_tag, tag_mask = load_TrainTestData(args.data_path)
-
-    bert = BertModel.from_pretrained('bert-base-uncased')
-
-    if args.model_type == 'GCNBert':
-        model = GCNBert(bert, num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat, bert_trainable=True)
-    elif args.model_type == 'MLPBert':
-        model = MLPBert(bert, num_classes=len(dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
-    elif args.model_type == 'MABert':
-        model = MABert(bert, num_classes=len(dataset.tag2id), bert_trainable=True)
-
-    # define loss function (criterion)
-    criterion = nn.MultiLabelSoftMarginLoss() #weight=torch.from_numpy(np.array(tag_weight)).float().cuda(0)
-
-    # define optimizer
-    optimizer = torch.optim.SGD(model.get_config_optim(args.lr, args.lrp),
-                                lr=args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
-
-    state = {'batch_size': args.batch_size, 'max_epochs': args.epochs, 'evaluate': args.evaluate, 'resume': args.resume,
-             'num_classes': dataset.get_tags_num(), 'difficult_examples': False,
-             'save_model_path': args.save_model_path, 'log_dir': args.log_dir, 'workers': args.workers,
-             'epoch_step': args.epoch_step, 'lr': args.lr, 'encoded_tag': encoded_tag, 'tag_mask': tag_mask,
-             'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': dataset.id2tag}
-
-    if args.evaluate:
-        state['evaluate'] = True
-
-    engine = GCNMultiLabelMAPEngine(state)
-    engine.learning(model, criterion, dataset, optimizer)
+    # if args.data_type == 'allData':
+    #     dataset, encoded_tag, tag_mask, tag_weight = load_allData(args.data_path)
+    #
+    # elif args.data_type == 'TrainTestData':
+    #     dataset, encoded_tag, tag_mask = load_TrainTestData(args.data_path)
+    #
+    # bert = BertModel.from_pretrained('bert-base-uncased')
+    #
+    # if args.model_type == 'GCNBert':
+    #     model = GCNBert(bert, num_classes=len(dataset.tag2id), t=0.4, co_occur_mat=dataset.co_occur_mat, bert_trainable=True)
+    # elif args.model_type == 'MLPBert':
+    #     model = MLPBert(bert, num_classes=len(dataset.tag2id), hidden_dim=512, hidden_layer_num=1, bert_trainable=True)
+    # elif args.model_type == 'MABert':
+    #     model = MABert(bert, num_classes=len(dataset.tag2id), bert_trainable=True)
+    #
+    # # define loss function (criterion)
+    # criterion = nn.MultiLabelSoftMarginLoss() #weight=torch.from_numpy(np.array(tag_weight)).float().cuda(0)
+    #
+    # # define optimizer
+    # optimizer = torch.optim.SGD(model.get_config_optim(args.lr, args.lrp),
+    #                             lr=args.lr,
+    #                             momentum=args.momentum,
+    #                             weight_decay=args.weight_decay)
+    #
+    # state = {'batch_size': args.batch_size, 'max_epochs': args.epochs, 'evaluate': args.evaluate, 'resume': args.resume,
+    #          'num_classes': dataset.get_tags_num(), 'difficult_examples': False,
+    #          'save_model_path': args.save_model_path, 'log_dir': args.log_dir, 'workers': args.workers,
+    #          'epoch_step': args.epoch_step, 'lr': args.lr, 'encoded_tag': encoded_tag, 'tag_mask': tag_mask,
+    #          'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': dataset.id2tag}
+    #
+    # if args.evaluate:
+    #     state['evaluate'] = True
+    #
+    # engine = GCNMultiLabelMAPEngine(state)
+    # engine.learning(model, criterion, dataset, optimizer)
 
 
 if __name__ == '__main__':
