@@ -102,4 +102,5 @@ def multiLabel_text_classify():
 
 
 if __name__ == '__main__':
-    multiLabel_text_classify()
+    # multiLabel_text_classify()
+    print("hhh")
