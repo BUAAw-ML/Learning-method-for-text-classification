@@ -58,11 +58,11 @@ parser.add_argument('--data_path', default='../datasets/ProgrammerWeb/programweb
 def multiLabel_text_classify():
 
     global args, use_gpu
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
     use_gpu = torch.cuda.is_available()
 
-    print("The type of model to train: {} \nData path: {}".format(args.model_type, args.data_path))
+    # print("The type of model to train: {} \nData path: {}".format(args.model_type, args.data_path))
 
     # if args.data_type == 'allData':
     #     dataset, encoded_tag, tag_mask, tag_weight = load_allData(args.data_path)
