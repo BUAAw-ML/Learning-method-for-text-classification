@@ -16,7 +16,7 @@ parser.add_argument('--epochs', default=20, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--epoch_step', default=[13], type=int, nargs='+',
                     help='number of epochs to change learning rate')
-parser.add_argument('--device_ids', default=[1], type=int, nargs='+',
+parser.add_argument('--device_ids', default=[0], type=int, nargs='+',
                     help='')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -103,4 +103,3 @@ def multiLabel_text_classify():
 
 if __name__ == '__main__':
     multiLabel_text_classify()
-    # print("hhh")
