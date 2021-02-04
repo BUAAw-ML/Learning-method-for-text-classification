@@ -120,7 +120,7 @@ fo.write(data_size)
 
 state = {'batch_size': args.batch_size, 'max_epochs': args.epochs, 'evaluate': args.evaluate,
          'resume': args.resume, 'num_classes': dataset.get_tags_num(), 'difficult_examples': False,
-         'save_model_path': result_method_path, 'log_dir': log_dir, 'workers': args.workers,
+         'save_model_path': args.save_model_path, 'log_dir': log_dir, 'workers': args.workers,
          'epoch_step': args.epoch_step, 'lr': args.D_lr, 'encoded_tag': encoded_tag, 'tag_mask': tag_mask,
          'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': dataset.id2tag,
          'result_file': fo, 'method': args.method, 'result_path_method': result_method_path}
