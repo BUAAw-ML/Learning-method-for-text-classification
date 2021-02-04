@@ -27,20 +27,20 @@
 
 
 python main.py \
-        --experiment_no='zyz_generateEmbedding'  \
-        --epochs=120 \
+        --experiment_no='wqb_MultiLabelMAP'  \
+        --epochs=150 \
         --epoch_step=110 \
         --device_ids=0 \
         --batch-size=8 \
         --G-lr=0.001 \
         --D-lr=0.1 \
-        --B-lr=0.01 \
+        --B-lr=0.001 \
         --save_model_path='./checkpoint' \
         --data_type='TrainTest_programWeb_freecode_AAPD' \
         --data_path='../datasets/Freecode' \
         --use_previousData=0 \
         --model_type='MABert' \
-        --method='semiGAN_MultiLabelMAP' \
+        --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
