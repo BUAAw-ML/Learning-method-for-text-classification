@@ -85,9 +85,9 @@ if not os.path.exists(result_path):
     os.makedirs(result_path)
 method_str = args.experiment_no + '_' + args.data_path.split("/")[-1]
 
-result_method_path = os.path.join(result_path, method_str)
-if not os.path.exists(result_method_path):
-    os.makedirs(result_method_path)
+# result_method_path = os.path.join(result_path, method_str)
+# if not os.path.exists(result_method_path):
+#     os.makedirs(result_method_path)
 
 fo = open(os.path.join(result_path, method_str + '.txt'), "a+")
 print('#' * 100 + '\n')
@@ -123,7 +123,7 @@ state = {'batch_size': args.batch_size, 'max_epochs': args.epochs, 'evaluate': a
          'save_model_path': args.save_model_path, 'log_dir': log_dir, 'workers': args.workers,
          'epoch_step': args.epoch_step, 'lr': args.D_lr, 'encoded_tag': encoded_tag, 'tag_mask': tag_mask,
          'device_ids': args.device_ids, 'print_freq': args.print_freq, 'id2tag': dataset.id2tag,
-         'result_file': fo, 'method': args.method, 'result_path_method': result_method_path}
+         'result_file': fo, 'method': args.method}
 
 # if args.evaluate:
 #     state['evaluate'] = True
