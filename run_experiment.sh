@@ -45,7 +45,7 @@ python main.py \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
         --intanceNum_limit=999999 \
-        --data_split=999999  \
+        --data_split=1000  \
         --test_description='' \
         --resume=''   #  \
 #        --evaluate=False
