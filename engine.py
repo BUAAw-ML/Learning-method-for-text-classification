@@ -502,7 +502,7 @@ class semiGAN_MultiLabelMAPEngine(MultiLabelMAPEngine):
 
         epsilon = 1e-8
 
-        z = torch.Tensor(ids.shape[0], 1, 768).uniform_(0, 1).cuda(self.state['device_ids'][0])
+        z = torch.Tensor(ids.shape[0], 1, 768).uniform_(-1, 1).cuda(self.state['device_ids'][0])
         # target_zeros = torch.zeros(ids.shape[0], 71).cuda(self.state['device_ids'][0])
 
         x_g = model['Generator'](z, self.state['encoded_tag'], self.state['tag_mask'])
