@@ -510,7 +510,7 @@ class semiGAN_MultiLabelMAPEngine(MultiLabelMAPEngine):
         # -----------train enc-----------
         flatten, logits, prob, attention = model['Classifier'](ids, token_type_ids, attention_mask,
                                                 self.state['encoded_tag'],
-                                                self.state['tag_mask'], x_g.detach())  #
+                                                self.state['tag_mask'], z)  # x_g.detach()
 
         self.state['output'] = logits
 
