@@ -213,7 +213,7 @@ class MABert(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, bert,num_classes, hidden_dim=768, input_dim=768, num_hidden_generator=4, hidden_dim_generator=2000):
+    def __init__(self, bert,num_classes, hidden_dim=768, input_dim=768, num_hidden_generator=8, hidden_dim_generator=2000):
         super(Generator, self).__init__()
 
         self.dropout = nn.Dropout(p=0.5)
