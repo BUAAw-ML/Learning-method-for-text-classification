@@ -195,7 +195,7 @@ class MABert(nn.Module):
 
         prob = torch.cat((prob,flatten),-1)
 
-        print(prob)
+        # print(prob)
         # prob = torch.sigmoid(prob)
         prob = self.output(prob)
 
