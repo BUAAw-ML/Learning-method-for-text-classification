@@ -240,7 +240,7 @@ class Generator(nn.Module):
 
     def forward(self, feat, encoded_tag, tag_mask):
 
-        feat = feat.expand(feat.shape[0], 8,feat.shape[2])
+        feat = feat.expand(feat.shape[0], self.num_classes,feat.shape[2])
 
         # embed = self.bert.get_input_embeddings()
         # tag_embedding = embed(encoded_tag)
