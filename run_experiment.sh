@@ -40,7 +40,7 @@ python main.py \
         --data_path='../datasets/Freecode' \
         --use_previousData=1 \
         --model_type='MABert' \
-        --method='semiGAN_MultiLabelMAP' \
+        --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
