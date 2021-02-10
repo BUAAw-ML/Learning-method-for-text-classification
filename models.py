@@ -201,7 +201,7 @@ class MABert(nn.Module):
 
 
 
-        return prob[:,1], logit, prob[:,0], attention
+        return prob, logit, prob, attention
 
     def get_config_optim(self, lr, lrp):
         return [
