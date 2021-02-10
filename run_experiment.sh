@@ -28,8 +28,8 @@
 
 python main.py \
         --experiment_no='wqb_MultiLabelMAP'  \
-        --epochs=150 \
-        --epoch_step=110 \
+        --epochs=180 \
+        --epoch_step=150 \
         --device_ids=0 \
         --batch-size=8 \
         --G-lr=0.0001 \
