@@ -213,11 +213,15 @@ class MABert(nn.Module):
 
 
 class Generator(nn.Module):
-    def __init__(self, bert, hidden_dim=768, input_dim=768, num_hidden_generator=4, hidden_dim_generator=2000):
+    def __init__(self, bert,num_classes, hidden_dim=768, input_dim=768, num_hidden_generator=4, hidden_dim_generator=2000):
         super(Generator, self).__init__()
 
         self.dropout = nn.Dropout(p=0.5)
         self.act = nn.LeakyReLU(0.2) #nn.Sigmoid()#
+
+        self.num_classes = num_classes
+
+        input_dim += num_classes
 
         self.num_hidden_generator = num_hidden_generator
         self.hidden_list_generator = nn.ModuleList()
@@ -225,9 +229,6 @@ class Generator(nn.Module):
             dim = input_dim if i == 0 else hidden_dim_generator
             self.hidden_list_generator.append(nn.Linear(dim, hidden_dim_generator))
 
-        # self.Linear1 = nn.Linear(input_dim, 1500)
-        # self.Linear2 = nn.Linear(1500, 3000)
-        # self.Linear3 = nn.Linear(3000, 2000)
         self.output = nn.Linear(hidden_dim_generator, hidden_dim)
 
         self.m1 = nn.BatchNorm1d(2000)
@@ -239,7 +240,7 @@ class Generator(nn.Module):
 
     def forward(self, feat, encoded_tag, tag_mask):
 
-        # feat = feat.expand(feat.shape[0], 4,feat.shape[2])
+        feat = feat.expand(feat.shape[0], 8,feat.shape[2])
 
         # embed = self.bert.get_input_embeddings()
         # tag_embedding = embed(encoded_tag)
@@ -247,23 +248,17 @@ class Generator(nn.Module):
         #                 / torch.sum(tag_mask, dim=1, keepdim=True)
         # tag_embedding = tag_embedding.detach().unsqueeze(0).expand_as(feat)
 
-        # tag_embedding = torch.eye(4).cuda(0).unsqueeze(0).expand(feat.shape[0],4,4)
-        # x = torch.cat((feat,tag_embedding),-1)
-        x = feat
+        tag_embedding = torch.eye(self.num_classes).cuda(0).unsqueeze(0).expand(feat.shape[0],self.num_classes,self.num_classes)
+        x = torch.cat((feat,tag_embedding),-1)
+        # x = feat
 
 
         for i in range(self.num_hidden_generator):
             x = self.hidden_list_generator[i](x)
-            # x = self.m1(x)
 
             x = self.act(x)
             # x = self.dropout(x)
-        # x = self.Linear1(x)
-        # x = self.act(x)
-        # x = self.Linear2(x)
-        # x = self.act(x)
-        # x = self.Linear3(x)
-        # x = self.act(x)
+
         y = self.output(x)
         return y
 

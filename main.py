@@ -136,7 +136,7 @@ criterion = nn.BCELoss() #nn.MultiLabelSoftMarginLoss()#nn.CrossEntropyLoss()#
 model = {}
 optimizer = {}
 
-model['Generator'] = Generator(bert)
+model['Generator'] = Generator(bert, len(dataset.tag2id))
 # define optimizer
 optimizer['Generator'] = torch.optim.SGD([{'params': model['Generator'].parameters(), 'lr': args.G_lr}],
                                          momentum=args.momentum, weight_decay=args.weight_decay)
