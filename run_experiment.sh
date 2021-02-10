@@ -27,7 +27,7 @@
 
 
 python main.py \
-        --experiment_no='wcm_test'  \
+        --experiment_no='wqb_MultiLabelMAP'  \
         --epochs=150 \
         --epoch_step=110 \
         --device_ids=0 \
@@ -45,7 +45,7 @@ python main.py \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
         --intanceNum_limit=999999 \
-        --data_split=1000  \
+        --data_split=999999  \
         --test_description='' \
         --resume=''   #  \
 #        --evaluate=False
