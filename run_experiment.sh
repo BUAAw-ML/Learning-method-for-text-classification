@@ -27,7 +27,7 @@
 
 
 python main.py \
-        --experiment_no='zyz_'  \
+        --experiment_no='zyz'  \
         --epochs=50 \
         --epoch_step=40 \
         --device_ids=0 \
@@ -40,7 +40,7 @@ python main.py \
         --data_path='../datasets/ganBert' \
         --use_previousData=0 \
         --model_type='MABert' \
-        --method='semiGAN_MultiLabelMAP' \
+        --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
