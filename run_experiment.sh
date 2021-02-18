@@ -27,17 +27,17 @@
 
 
 python main.py \
-        --experiment_no='wqb_MultiLabelMAP'  \
-        --epochs=120 \
-        --epoch_step=110 \
+        --experiment_no='zyz'  \
+        --epochs=50 \
+        --epoch_step=40 \
         --device_ids=0 \
         --batch-size=8 \
         --G-lr=0.001 \
         --D-lr=0.1 \
         --B-lr=0.001 \
         --save_model_path='./checkpoint' \
-        --data_type='TrainTest_programWeb_freecode_AAPD' \
-        --data_path='../datasets/AAPD' \
+        --data_type='TrainTest_ganBert' \
+        --data_path='../datasets/ganBert' \
         --use_previousData=0 \
         --model_type='MABert' \
         --method='MultiLabelMAP' \

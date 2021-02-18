@@ -50,6 +50,14 @@ def load_data(data_config, data_path=None, data_type='allData', use_previousData
             dataset.unlabeled_train_data = data[ind[:split2]].tolist()
             dataset.test_data = data[ind[split2:split3]].tolist()
 
+        elif data_type == 'TrainTest_ganBert':
+
+            file = os.path.join(data_path, 'labeled.tsv')
+            dataset.train_data = dataset.load_ganBert(file)
+            file = os.path.join(data_path, 'unlabeled.tsv')
+            dataset.unlabeled_train_data = dataset.load_ganBert(file)
+            file = os.path.join(data_path, 'test.tsv')
+            dataset.test_data = dataset.load_ganBert(file)
 
         elif data_type == 'TrainTest_programWeb_freecode_AAPD':
 
@@ -361,6 +369,54 @@ class dataEngine(Dataset):
 
         print("The number of tags for training: {}".format(len(self.tag2id)))
         # os.makedirs('cache', exist_ok=True)
+
+        return data
+
+    def load_ganBert(self, file):
+        data = []
+        document = []
+
+        with open(file, 'r') as f:
+            contents = f.read()
+            file_as_list = contents.splitlines()
+            for line in file_as_list[1:]:
+                split = line.split(" ")
+                dscp = ' '.join(split[1:])
+
+                inn_split = split[0].split(":")
+                tag = inn_split[0] + "_" + inn_split[1]
+
+                dscp_tokens = tokenizer.tokenize(dscp.strip())
+                if len(dscp_tokens) > 510:
+                    if self.data_config['overlength_handle'] == 'truncation':
+                        dscp_tokens = dscp_tokens[:510]
+                    else:
+                        continue
+
+                document.append(" ".join(dscp_tokens))
+
+                dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
+
+                if tag in self.tag2id:
+                    tag_id = self.tag2id[tag]
+                elif tag == 'UNK_UNK':
+                    tag_id = 0
+                else:
+                    tag_id = len(self.tag2id)
+                    self.tag2id[tag] = tag_id
+                    self.id2tag[tag_id] = tag
+
+                data.append({
+                    'id': 0,
+                    'dscp_ids': dscp_ids,
+                    'dscp_tokens': dscp_tokens,
+                    'tag_ids': tag_id,
+                    'dscp': dscp
+                })
+
+        print("The number of tags for training: {}".format(len(self.tag2id)))
+        os.makedirs('cache', exist_ok=True)
+        print(self.tag2id.keys())
 
         return data
 
