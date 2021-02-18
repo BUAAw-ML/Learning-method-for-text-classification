@@ -28,16 +28,16 @@
 
 python main.py \
         --experiment_no='wcm_semiGAN_MultiLabelMAP'  \
-        --epochs=180 \
-        --epoch_step=150 \
+        --epochs=120 \
+        --epoch_step=110 \
         --device_ids=0 \
         --batch-size=8 \
-        --G-lr=0.0001 \
+        --G-lr=0.001 \
         --D-lr=0.1 \
-        --B-lr=0.0001 \
+        --B-lr=0.001 \
         --save_model_path='./checkpoint' \
         --data_type='TrainTest_programWeb_freecode_AAPD' \
-        --data_path='../datasets/Freecode' \
+        --data_path='../datasets/AAPD' \
         --use_previousData=0 \
         --model_type='MABert' \
         --method='semiGAN_MultiLabelMAP' \
