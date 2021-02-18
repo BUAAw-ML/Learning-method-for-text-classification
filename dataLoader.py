@@ -266,8 +266,8 @@ class dataEngine(Dataset):
             tags[i, batch[i]['tag_ids']] = 1.
 
         dscp = [e['dscp'] for e in batch]
-        label_mask = torch.tensor([e['label'] for e in batch]).byte()
-        label_mask = torch.nonzero(label_mask).squeeze(-1)
+        # label_mask = torch.tensor([e['label'] for e in batch]).byte()
+        # label_mask = torch.nonzero(label_mask).squeeze(-1)
 
         return (ids, token_type_ids, attention_mask, dscp_tokens), tags, dscp
 
@@ -484,8 +484,7 @@ class dataEngine(Dataset):
                     'dscp_ids': dscp_ids,
                     'dscp_tokens': dscp_tokens,
                     'tag_ids': tag_ids,
-                    'dscp': dscp,
-                    'label': 1
+                    'dscp': dscp
                 })
 
         print("The number of tags for training: {}".format(len(self.tag2id)))
