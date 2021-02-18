@@ -27,7 +27,7 @@
 
 
 python main.py \
-        --experiment_no='wcm_semiGAN_MultiLabelMAP'  \
+        --experiment_no='wqb_MultiLabelMAP'  \
         --epochs=120 \
         --epoch_step=110 \
         --device_ids=0 \
@@ -40,7 +40,7 @@ python main.py \
         --data_path='../datasets/AAPD' \
         --use_previousData=0 \
         --model_type='MABert' \
-        --method='semiGAN_MultiLabelMAP' \
+        --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
