@@ -190,12 +190,12 @@ class Engine(object):
             #     'best_score': self.state['best_score'],
             # }, is_best)
 
-            self.state['best_score']['map'] = max(prec1['map'], self.state['best_score']['map'])
+            # self.state['best_score']['map'] = max(prec1['map'], self.state['best_score']['map'])
             if prec1['OF1'] >= self.state['best_score']['OF1']:
+                self.state['best_score']['map'] = prec1['map']
                 self.state['best_score']['OF1'] = prec1['OF1']
                 self.state['best_score']['OP'] = prec1['OP']
                 self.state['best_score']['OR'] = prec1['OR']
-            if prec1['CF1'] >= self.state['best_score']['CF1']:
                 self.state['best_score']['CF1'] = prec1['CF1']
                 self.state['best_score']['CP'] = prec1['CP']
                 self.state['best_score']['CR'] = prec1['CR']
@@ -411,18 +411,18 @@ class MultiLabelMAPEngine(Engine):
     def on_end_epoch(self, training, model, criterion, data_loader, optimizer=None, display=True):
         map = 100 * self.state['ap_meter'].value().mean()
         loss = self.state['meter_loss'].value()[0]
-        OP, OR, OF1, CP, CR, CF1 = self.state['ap_meter'].overall()
-        OP_k, OR_k, OF1_k, CP_k, CR_k, CF1_k = self.state['ap_meter'].overall_topk(3)
+        OP, OR, OF1, CP, CR, CF1 = 100 * self.state['ap_meter'].overall()
+        OP_k, OR_k, OF1_k, CP_k, CR_k, CF1_k = 100 * self.state['ap_meter'].overall_topk(3)
         if display:
             if training:
                 reselt_str = 'Epoch: [{0}]\t Loss {loss:.4f}\t mAP {map:.3f} \n ' \
-                'OP: {OP:.4f}\t OR: {OR:.4f}\t OF1: {OF1:.4f}\t CP: {CP:.4f}\t CR: {CR:.4f}\t CF1: {CF1:.4f}'.format(
+                'OP: {OP:.3f}\t OR: {OR:.3f}\t OF1: {OF1:.3f}\t CP: {CP:.3f}\t CR: {CR:.3f}\t CF1: {CF1:.3f}'.format(
                 self.state['epoch'], loss=loss, map=map, OP=OP, OR=OR, OF1=OF1, CP=CP, CR=CR, CF1=CF1)
 
             else:
                 reselt_str = 'Test: \t Loss {loss:.4f}\t mAP {map:.3f} \n' \
-                'OP: {OP:.4f}\t OR: {OR:.4f}\t OF1: {OF1:.4f}\t CP: {CP:.4f}\t CR: {CR:.4f}\t CF1: {CF1:.4f} \n' \
-                'OP_3: {OP_3:.4f}\t OR_3: {OR_3:.4f}\t OF1_3: {OF1_3:.4f}\t CP_3: {CP_3:.4f}\t CR_3: {CR_3:.4f}\t CF1_3: {CF1_3:.4f}'.format(
+                'OP: {OP:.3f}\t OR: {OR:.3f}\t OF1: {OF1:.3f}\t CP: {CP:.3f}\t CR: {CR:.3f}\t CF1: {CF1:.3f} \n' \
+                'OP_3: {OP_3:.3f}\t OR_3: {OR_3:.3f}\t OF1_3: {OF1_3:.3f}\t CP_3: {CP_3:.3f}\t CR_3: {CR_3:.3f}\t CF1_3: {CF1_3:.3f}'.format(
                     loss=loss, map=map, OP=OP, OR=OR, OF1=OF1, CP=CP, CR=CR, CF1=CF1,
                     OP_3=OP_k, OR_3=OR_k, OF1_3=OF1_k, CP_3=CP_k, CR_3=CR_k, CF1_3=CF1_k)
 
