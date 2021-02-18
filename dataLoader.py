@@ -484,7 +484,8 @@ class dataEngine(Dataset):
                     'dscp_ids': dscp_ids,
                     'dscp_tokens': dscp_tokens,
                     'tag_ids': tag_ids,
-                    'dscp': dscp
+                    'dscp': dscp,
+                    'label': 1
                 })
 
         print("The number of tags for training: {}".format(len(self.tag2id)))
