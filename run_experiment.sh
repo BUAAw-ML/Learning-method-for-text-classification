@@ -16,7 +16,7 @@ python main.py \
         --save_model_path='./checkpoint' \
         --data_type='TrainTest_programWeb_freecode_AAPD' \
         --data_path='../datasets/AAPD' \
-        --use_previousData=0 \
+        --use_previousData=1 \
         --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
