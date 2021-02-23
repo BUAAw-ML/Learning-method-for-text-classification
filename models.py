@@ -35,12 +35,12 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0] #N, L, hidden_size
 
-        fake_ids = ids.clone()
-        fake_ids[fake_ids > 102] -= 1
-
-        feat = self.bert(fake_ids,
-                               token_type_ids=token_type_ids,
-                               attention_mask=attention_mask)[0]
+        # fake_ids = ids.clone()
+        # fake_ids[fake_ids > 102] -= 1
+        #
+        # feat = self.bert(fake_ids,
+        #                        token_type_ids=token_type_ids,
+        #                        attention_mask=attention_mask)[0]
         # print(token_feat.shape)
 
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
