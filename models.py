@@ -42,8 +42,6 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0]
 
-        print(fake_ids-ids)
-
         # sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
         #                 / torch.sum(attention_mask, dim=1, keepdim=True)#N, hidden_size
 
@@ -114,7 +112,6 @@ class MABert(nn.Module):
 
 
         # print(self.output(prob))
-        print(prob)
         prob = self.output(prob)
 
         # prob = torch.mean(prob,-1)
