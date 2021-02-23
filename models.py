@@ -153,11 +153,11 @@ class MABert(nn.Module):
                                attention_mask=attention_mask)[0] #N, L, hidden_size
         print(ids)
         print(ids[ids != 0] - 1)
-        fake_ids = (ids[ids != 0] - 1).clone()
-        print(fake_ids)
-        fake_ids[ids == 101] = ids[ids == 101]
-        fake_ids[ids == 102] = ids[ids == 102]
-        print(fake_ids)
+        # fake_ids = ids[ids != 0] - 1
+        # print(fake_ids)
+        # fake_ids[ids == 101] = ids[ids == 101]
+        # fake_ids[ids == 102] = ids[ids == 102]
+        # print(fake_ids)
 
 
         # and ids != 101 and ids != 102
