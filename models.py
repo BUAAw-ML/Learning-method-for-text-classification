@@ -37,7 +37,7 @@ class MABert(nn.Module):
 
         fake_ids = ids.clone()#.detach()
         print(torch.Tensor(8, fake_ids.shape[1]).uniform_(150, 28000).int().cuda(0))
-        fake_ids = torch.where(fake_ids > 102, torch.Tensor(8, fake_ids.shape[1]).uniform_(150, 28000).int().cuda(0), fake_ids)
+        fake_ids = torch.where(fake_ids > 102, torch.Tensor(8, fake_ids.shape[1]).uniform_(150, 28000).long().cuda(0), fake_ids)
         print(fake_ids)
         # fake_ids[fake_ids > 102] -=
 
