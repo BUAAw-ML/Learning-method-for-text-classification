@@ -152,7 +152,8 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0] #N, L, hidden_size
         print(ids)
-        print(ids[ids > 102] - 1)
+        ids[ids > 102] -= 1
+        print(ids)
 
         # print(torch.sum(attention_mask, dim=1, keepdim=True))
 
