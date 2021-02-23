@@ -71,6 +71,7 @@ class MABert(nn.Module):
         # attention_out = self.Linear2(attention_out).squeeze(-1)
 
         logit = torch.sigmoid(attention_out)
+        print(logit)
         #################fake sample process#######
         # feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
         # feat += token_feat.detach()
