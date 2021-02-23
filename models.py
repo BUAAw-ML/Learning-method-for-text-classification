@@ -111,7 +111,7 @@ class MABert(nn.Module):
 
         prob = torch.cat((attention_out_fake,attention_out),-1)
 
-        print(prob)
+        # print(prob)
         # print(self.output(prob))
         prob = self.output(prob)
 
