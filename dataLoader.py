@@ -797,7 +797,7 @@ class dataEngine(Dataset):
 
         unlabeled_train_data = copy.deepcopy(train_data)
 
-        unlabeled_data_num = 2000
+        unlabeled_data_num = 1000
 
         if len(unlabeled_train_data) >= unlabeled_data_num:
             unlabeled_train_data = train_data[:unlabeled_data_num]
