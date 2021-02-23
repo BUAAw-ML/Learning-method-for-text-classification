@@ -13,13 +13,13 @@ python main.py \
         --batch-size=8 \
         --G-lr=0.001 \
         --D-lr=0.1 \
-        --B-lr=0.01 \
+        --B-lr=0.001 \
         --save_model_path='./checkpoint' \
         --data_type='TrainTest_programWeb_freecode_AAPD' \
         --data_path='../datasets/AAPD' \
         --use_previousData=1 \
         --model_type='MABert' \
-        --method='MultiLabelMAP' \
+        --method='semiGAN_MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
