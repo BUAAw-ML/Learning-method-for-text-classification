@@ -35,12 +35,12 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0] #N, L, hidden_size
 
-        fake_ids = ids.clone()
-        fake_ids[fake_ids > 102] -= 1
-
-        feat = self.bert(fake_ids,
-                               token_type_ids=token_type_ids,
-                               attention_mask=attention_mask)[0]
+        # fake_ids = ids.clone()
+        # fake_ids[fake_ids > 102] -= 1
+        #
+        # feat = self.bert(fake_ids,
+        #                        token_type_ids=token_type_ids,
+        #                        attention_mask=attention_mask)[0]
         # print(token_feat.shape)
 
         sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
@@ -71,7 +71,7 @@ class MABert(nn.Module):
 
         logit = torch.sigmoid(attention_out)
         #################fake sample process#######
-        # feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
+        feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
         # feat += token_feat.detach()
         # feat = torch.mean(feat, 1)
         attention_fake = (torch.matmul(feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(
