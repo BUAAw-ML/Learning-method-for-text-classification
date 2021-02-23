@@ -35,7 +35,7 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0] #N, L, hidden_size
 
-        fake_ids = ids.clone().detach()
+        fake_ids = ids.clone()#.detach()
         fake_ids[fake_ids > 102] -= 1
 
         feat = self.bert(fake_ids,
@@ -111,7 +111,7 @@ class MABert(nn.Module):
 
         prob = torch.cat((attention_out_fake,attention_out),-1)
 
-        # print(prob)
+        print(prob)
         # print(self.output(prob))
         prob = self.output(prob)
 
