@@ -7,7 +7,7 @@
 
 python main.py \
         --experiment_no='wcm'  \
-        --epochs=1 \
+        --epochs=50 \
         --epoch_step=40 \
         --device_ids=0 \
         --batch-size=8 \
