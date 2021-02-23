@@ -152,7 +152,13 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0] #N, L, hidden_size
         print(ids)
-        print(ids[ids != 0 and ids != 101 and ids != 102] -1)
+        fake_ids = ids[ids != 0] - 1
+        fake_ids[ids == 101] = 101
+        fake_ids[ids == 102] = 102
+        print(fake_ids)
+
+
+        # and ids != 101 and ids != 102
         # feat = self.bert(ids,
         #                        token_type_ids=token_type_ids,
         #                        attention_mask=attention_mask)[0]
