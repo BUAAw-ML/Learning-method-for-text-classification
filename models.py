@@ -71,7 +71,7 @@ class MABert(nn.Module):
 
         logit = torch.sigmoid(attention_out)
         #################fake sample process#######
-        # feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
+        feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
         # feat += token_feat.detach()
         # feat = torch.mean(feat, 1)
         attention_fake = (torch.matmul(feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(
