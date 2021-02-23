@@ -61,6 +61,8 @@ class MABert(nn.Module):
         # similarity = torch.sum(similarity, -1)
 
         attention = F.softmax(attention, -1)
+        print(torch.max(attention, -1))
+
         attention_out = attention @ token_feat   # N, labels_num, hidden_size
 
         attention_out = attention_out * self.class_weight
@@ -85,7 +87,8 @@ class MABert(nn.Module):
         # similarity_fake = torch.sum(similarity_fake, -1)
 
         attention_fake = F.softmax(attention_fake, -1)
-        print(attention_fake)
+        print('+',torch.max(attention_fake,-1))
+
         attention_out_fake = attention_fake @ feat  # N, labels_num, hidden_size
         # discrimate = torch.matmul(feat, tag_embedding.transpose(0, 1))
         attention_out_fake = attention_out_fake * self.class_weight
