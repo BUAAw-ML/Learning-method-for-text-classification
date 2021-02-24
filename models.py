@@ -67,8 +67,7 @@ class MABert(nn.Module):
 
         #################fake sample process#######
 
-        print(torch.sum(attention,-2).shape)
-        print(ids.shape)
+        print(torch.sum(attention,-2))
 
         fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
 
