@@ -56,7 +56,8 @@ class MABert(nn.Module):
 
         attention = F.softmax(attention, -1)
 
-        attention_out = torch.matmul(attention, token_feat)   # N, labels_num, hidden_size
+        hidden_out = torch.matmul(attention, token_feat)   # N, labels_num, hidden_size
+        attention_out = hidden_out[:, :-1]
 
         attention_out = attention_out * self.class_weight
         attention_out = torch.sum(attention_out, -1)
