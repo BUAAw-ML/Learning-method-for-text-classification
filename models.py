@@ -36,15 +36,6 @@ class MABert(nn.Module):
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0] #N, L, hidden_size
 
-        fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
-
-        fake_ids = torch.where(fake_ids > 102, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 30000).long().cuda(0), fake_ids)
-        # fake_ids[fake_ids > 102] -=
-
-        feat = self.bert(fake_ids,
-                               token_type_ids=token_type_ids,
-                               attention_mask=attention_mask)[0]#.detach()
-
         # sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
         #                 / torch.sum(attention_mask, dim=1, keepdim=True)#N, hidden_size
 
@@ -75,6 +66,19 @@ class MABert(nn.Module):
         logit = torch.sigmoid(attention_out)
 
         #################fake sample process#######
+
+        print(torch.sum(attention,-2).shape)
+        print(ids.shape)
+
+        fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
+
+        fake_ids = torch.where(fake_ids > 102, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 30000).long().cuda(0), fake_ids)
+        # fake_ids[fake_ids > 102] -=
+
+        feat = self.bert(fake_ids,
+                               token_type_ids=token_type_ids,
+                               attention_mask=attention_mask)[0]#.detach()
+
         # feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
         # feat += token_feat.detach()
         # feat = torch.mean(feat, 1)
@@ -122,16 +126,9 @@ class MABert(nn.Module):
         # attention_out = torch.sum(attention_out, -1, keepdim=True)
         # attention_out_fake = torch.sum(attention_out_fake, -1, keepdim=True)
 
-        attention_out = torch.max(attention_out, -1, keepdim=True)[0]
-        attention_out_fake = torch.max(attention_out_fake, -1, keepdim=True)[0]
-
         prob = torch.cat((attention_out_fake,attention_out),-1)
-        # print(prob)
 
-        prob = torch.sigmoid(prob)
-
-
-        # prob = self.output(prob)
+        prob = self.output(prob)
 
         # prob = torch.mean(prob,-1)
 
