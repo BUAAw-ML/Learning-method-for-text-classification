@@ -6,7 +6,7 @@
 
 
 python main.py \
-        --experiment_no='wcm_2'  \
+        --experiment_no='wqb'  \
         --epochs=100 \
         --epoch_step=90 \
         --device_ids=0 \
