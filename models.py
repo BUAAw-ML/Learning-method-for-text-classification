@@ -68,6 +68,11 @@ class MABert(nn.Module):
 
         logit = torch.sigmoid(attention_out)
 
+        discrimate_hidden = torch.sum(
+            torch.matmul(hidden_out[:, -1].squeeze(-2), self.class_weight.transpose(0, 1)), -1, keepdim=True)
+
+        attention_out = torch.cat((attention_out, discrimate_hidden), -1)
+
         flatten = self.output(attention_out)[:,-1]
 
         #################fake sample process#######

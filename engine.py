@@ -515,7 +515,7 @@ class semiGAN_MultiLabelMAPEngine(MultiLabelMAPEngine):
         self.state['output'] = logits
 
         D_L_unsupervised = -1 * torch.mean(torch.log(prob + epsilon)) #1 -
-        D_L_unsupervised2 = -1 * torch.mean(torch.log(flatten + epsilon))
+        D_L_unsupervised2 = -1 * torch.mean(torch.log(1 - flatten + epsilon))
 
         if semi_supervised == False:  # train with labeled data
             d_loss = criterion(self.state['output'], target_var)
@@ -532,7 +532,7 @@ class semiGAN_MultiLabelMAPEngine(MultiLabelMAPEngine):
 
         else:
             # -----------train Generator-----------
-            d_loss = D_L_unsupervised #+ D_L_unsupervised2
+            d_loss = D_L_unsupervised + D_L_unsupervised2
             if training:
                 optimizer['Classifier'].zero_grad()
                 d_loss.backward()
