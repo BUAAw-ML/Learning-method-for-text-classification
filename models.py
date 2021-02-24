@@ -122,11 +122,8 @@ class MABert(nn.Module):
         attention_out = torch.sum(attention_out, -1, keepdim=True)
         attention_out_fake = torch.sum(attention_out_fake, -1, keepdim=True)
 
-        print(attention_out_fake)
-        flatten = torch.sigmoid(attention_out_fake)
-
         prob = torch.cat((attention_out_fake,attention_out),-1)
-
+        prob = torch.sigmoid(prob)
 
 
         # prob = self.output(prob)
@@ -167,7 +164,7 @@ class MABert(nn.Module):
         # prob = torch.max(pred[:,:self.num_classes],-1)[0] - 0.5
         # prob = self.relu(prob)
 
-        return prob[:,1], logit, flatten, attention
+        return prob[:,1], logit, prob[:,0], attention
 
     # def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask, feat):
     #     token_feat = self.bert(ids,
