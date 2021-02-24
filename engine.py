@@ -532,7 +532,7 @@ class semiGAN_MultiLabelMAPEngine(MultiLabelMAPEngine):
 
         else:
             # -----------train Generator-----------
-            d_loss = D_L_unsupervised + D_L_unsupervised2
+            d_loss = D_L_unsupervised #+ D_L_unsupervised2
             if training:
                 optimizer['Classifier'].zero_grad()
                 d_loss.backward()
