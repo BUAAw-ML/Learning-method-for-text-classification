@@ -107,6 +107,9 @@ class MABert(nn.Module):
         attention_out_fake = torch.sum(attention_out_fake, -1)
 
         discrimate_hidden = torch.sum(torch.matmul(hidden_out_fake[:,-1].squeeze(-2), self.class_weight.transpose(0, 1)),-1)
+        print(attention_out_fake.shape)
+        print(discrimate_hidden.shape)
+
         attention_out_fake = torch.cat((attention_out_fake, discrimate_hidden), -1)
 
         prob = self.output(attention_out_fake)[:, -1]
