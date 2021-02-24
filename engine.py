@@ -551,7 +551,8 @@ class semiGAN_MultiLabelMAPEngine(MultiLabelMAPEngine):
                 nn.utils.clip_grad_norm_(model['Generator'].parameters(), max_norm=10.0)
                 optimizer['Generator'].step()
 
-            self.state['loss'] = [d_loss, g_loss]
+            # self.state['loss'] = [d_loss, g_loss]
+            self.state['loss'] = [D_L_unsupervised, D_L_unsupervised2]
 
         if not training:
             return self.state['output'], ids, dscp_tokens, attention
