@@ -112,7 +112,7 @@ class MABert(nn.Module):
 
         # prob =  torch.sigmoid(attention_out_fake)
 
-        print(attention_out_fake - attention_out)
+        print(torch.sum(attention_out_fake - attention_out > 0, -1))
 
         attention_out = torch.sum(attention_out, -1, keepdim=True)
         attention_out_fake = torch.sum(attention_out_fake, -1, keepdim=True)
