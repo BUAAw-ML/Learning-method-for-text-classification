@@ -32,20 +32,18 @@ class MABert(nn.Module):
 
     def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask, feat):
 
+        token_feat = self.bert(ids,
+                               token_type_ids=token_type_ids,
+                               attention_mask=attention_mask)[0] #N, L, hidden_size
+
         fake_ids = ids.clone()#.detach()
 
-        fake_ids = torch.where(fake_ids > 102, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 28000).long().cuda(0), fake_ids)
+        fake_ids = torch.where(fake_ids > 102, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0), fake_ids)
         # fake_ids[fake_ids > 102] -=
 
         feat = self.bert(fake_ids,
                                token_type_ids=token_type_ids,
                                attention_mask=attention_mask)[0]#.detach()
-
-        token_feat = self.bert(ids,
-                               token_type_ids=token_type_ids,
-                               attention_mask=attention_mask)[0] #N, L, hidden_size
-
-
 
         # sentence_feat = torch.sum(token_feat * attention_mask.unsqueeze(-1), dim=1) \
         #                 / torch.sum(attention_mask, dim=1, keepdim=True)#N, hidden_size
