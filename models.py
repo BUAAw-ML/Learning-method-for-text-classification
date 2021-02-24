@@ -66,7 +66,7 @@ class MABert(nn.Module):
         # attention_out = self.act(attention_out)
         # attention_out = self.Linear2(attention_out).squeeze(-1)
 
-        logit = torch.sigmoid(attention_out)[:,:-1]
+        logit = torch.sigmoid(attention_out)
 
         flatten = self.output(attention_out)[:,-1]
 
