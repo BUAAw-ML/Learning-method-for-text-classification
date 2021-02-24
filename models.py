@@ -105,10 +105,9 @@ class MABert(nn.Module):
 
         attention_out_fake = attention_out_fake * self.class_weight
         attention_out_fake = torch.sum(attention_out_fake, -1)
-        print()
 
-        print(torch.mutmul(hidden_out_fake[:,-1].squeeze(-2), self.class_weight.transpose(0, 1)).shape)
-        attention_out_fake = torch.cat((attention_out_fake, torch.mutmul(hidden_out_fake[:,-1].squeeze(-2), self.class_weight.transpose(0, 1))), -1)
+        print(torch.matmul(hidden_out_fake[:,-1].squeeze(-2), self.class_weight.transpose(0, 1)).shape)
+        attention_out_fake = torch.cat((attention_out_fake, torch.matmul(hidden_out_fake[:,-1].squeeze(-2), self.class_weight.transpose(0, 1))), -1)
 
         prob = self.output(attention_out_fake)[:, -1]
 
