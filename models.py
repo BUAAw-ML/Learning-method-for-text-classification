@@ -45,7 +45,6 @@ class MABert(nn.Module):
                         / torch.sum(tag_mask, dim=1, keepdim=True)  #labels_num, hidden_size
 
         tag_embedding = torch.cat((tag_embedding, self.discriminator), 0)
-        print(tag_embedding.shape)
 
         masks = torch.unsqueeze(attention_mask, 1)  # N, 1, L  .bool()
         attention = (torch.matmul(token_feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(~masks.bool(), torch.tensor(-np.inf))
@@ -67,7 +66,7 @@ class MABert(nn.Module):
         # attention_out = self.Linear2(attention_out).squeeze(-1)
 
         logit = torch.sigmoid(attention_out)[:,:-1]
-        print(logit.shape)
+
         flatten = self.output(attention_out)[:,-1]
 
         #################fake sample process#######
