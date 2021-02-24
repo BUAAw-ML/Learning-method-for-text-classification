@@ -7,8 +7,8 @@
 
 python main.py \
         --experiment_no='wcm'  \
-        --epochs=50 \
-        --epoch_step=40 \
+        --epochs=100 \
+        --epoch_step=90 \
         --device_ids=0 \
         --batch-size=8 \
         --G-lr=0.001 \
@@ -19,7 +19,7 @@ python main.py \
         --data_path='../datasets/AAPD' \
         --use_previousData=1 \
         --model_type='MABert' \
-        --method='MultiLabelMAP' \
+        --method='semiGAN_MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
