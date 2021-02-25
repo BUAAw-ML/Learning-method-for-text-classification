@@ -201,10 +201,10 @@ class Engine(object):
                 self.state['best_score']['CR'] = prec1['CR']
 
             best_str = '**best** map={map:.3f} OP={OP:.3f} OR={OR:.3f} OF1={OF1:.3f} CP={CP:.3f} CR={CR:.3f} CF1={CF1:.3f}'.format(
-                map=self.state['best_score']['map'], OP=self.state['best_score']['OP'],
-                OR=self.state['best_score']['OR'],
-                OF1=self.state['best_score']['OF1'], CP=self.state['best_score']['CP'],
-                CR=self.state['best_score']['CR'], CF1=self.state['best_score']['CF1'])
+                map=100 * self.state['best_score']['map'], OP=100 * self.state['best_score']['OP'],
+                OR=100 * self.state['best_score']['OR'],
+                OF1=100 * self.state['best_score']['OF1'], CP=100 * self.state['best_score']['CP'],
+                CR=100 * self.state['best_score']['CR'], CF1=100 * self.state['best_score']['CF1'])
 
             print(best_str)
             self.result_file.write(best_str + '\n')
@@ -417,14 +417,14 @@ class MultiLabelMAPEngine(Engine):
             if training:
                 reselt_str = 'Epoch: [{0}]\t Loss {loss:.4f}\t mAP {map:.3f} \n ' \
                 'OP: {OP:.3f}\t OR: {OR:.3f}\t OF1: {OF1:.3f}\t CP: {CP:.3f}\t CR: {CR:.3f}\t CF1: {CF1:.3f}'.format(
-                self.state['epoch'], loss=loss, map=map, OP=OP, OR=OR, OF1=OF1, CP=CP, CR=CR, CF1=CF1)
+                self.state['epoch'], loss=loss, map=100 * map, OP=100 * OP, OR=100 * OR, OF1=100 * OF1, CP=100 * CP, CR=100 * CR, CF1=100 * CF1)
 
             else:
                 reselt_str = 'Test: \t Loss {loss:.4f}\t mAP {map:.3f} \n' \
                 'OP: {OP:.3f}\t OR: {OR:.3f}\t OF1: {OF1:.3f}\t CP: {CP:.3f}\t CR: {CR:.3f}\t CF1: {CF1:.3f} \n' \
                 'OP_3: {OP_3:.3f}\t OR_3: {OR_3:.3f}\t OF1_3: {OF1_3:.3f}\t CP_3: {CP_3:.3f}\t CR_3: {CR_3:.3f}\t CF1_3: {CF1_3:.3f}'.format(
-                    loss=loss, map=map, OP=OP, OR=OR, OF1=OF1, CP=CP, CR=CR, CF1=CF1,
-                    OP_3=OP_k, OR_3=OR_k, OF1_3=OF1_k, CP_3=CP_k, CR_3=CR_k, CF1_3=CF1_k)
+                    loss=loss, map=100 * map, OP=100 * OP, OR=100 * OR, OF1=100 * OF1, CP=100 * CP, CR=100 * CR, CF1=100 * CF1,
+                    OP_3=100 * OP_k, OR_3=100 * OR_k, OF1_3=100 * OF1_k, CP_3=100 * CP_k, CR_3=100 * CR_k, CF1_3=100 * CF1_k)
 
             print(reselt_str)
             self.result_file.write(reselt_str + '\n')

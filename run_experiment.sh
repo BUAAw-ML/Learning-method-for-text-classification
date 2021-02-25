@@ -6,7 +6,7 @@
 
 
 python main.py \
-        --experiment_no='wqb'  \
+        --experiment_no='wqb_bertAug'  \
         --epochs=100 \
         --epoch_step=90 \
         --device_ids=0 \
@@ -17,7 +17,7 @@ python main.py \
         --save_model_path='./checkpoint' \
         --data_type='TrainTest_programWeb_freecode_AAPD' \
         --data_path='../datasets/AAPD' \
-        --use_previousData=1 \
+        --use_previousData=0 \
         --model_type='MABert' \
         --method='semiGAN_MultiLabelMAP' \
         --overlength_handle='truncation' \
