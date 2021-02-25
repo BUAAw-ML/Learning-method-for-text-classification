@@ -191,7 +191,7 @@ class Engine(object):
             # }, is_best)
 
             # self.state['best_score']['map'] = max(prec1['map'], self.state['best_score']['map'])
-            if prec1['OF1'] >= self.state['best_score']['OF1']:
+            if prec1['OF1'] > self.state['best_score']['OF1']:
                 self.state['best_score']['map'] = prec1['map']
                 self.state['best_score']['OF1'] = prec1['OF1']
                 self.state['best_score']['OP'] = prec1['OP']

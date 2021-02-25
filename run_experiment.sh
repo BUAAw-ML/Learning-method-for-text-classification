@@ -6,7 +6,7 @@
 
 
 python main.py \
-        --experiment_no='wqb'  \
+        --experiment_no='wcm_MultiLabelMAP'  \
         --epochs=100 \
         --epoch_step=90 \
         --device_ids=0 \
@@ -19,7 +19,7 @@ python main.py \
         --data_path='../datasets/AAPD' \
         --use_previousData=1 \
         --model_type='MABert' \
-        --method='semiGAN_MultiLabelMAP' \
+        --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
