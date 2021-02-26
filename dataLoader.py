@@ -72,7 +72,7 @@ def load_data(data_config, data_path=None, data_type='allData', use_previousData
         elif data_type == 'TrainTest_agNews':
 
             file = os.path.join(data_path, 'train.csv')
-            data = dataset.load_agNews(file)
+            data = dataset.load_augmentText(file)
 
             data = np.array(data)
             ind = np.random.RandomState(seed=10).permutation(len(data))
@@ -84,7 +84,7 @@ def load_data(data_config, data_path=None, data_type='allData', use_previousData
             dataset.train_data = data[ind].tolist()
 
             file = os.path.join(data_path, 'test.csv')
-            dataset.test_data = dataset.load_agNews(file, train=False)
+            dataset.test_data = dataset.load_augmentText(file, train=False)
             dataset.unlabeled_train_data = dataset.test_data[:500]
             # tdate = dataset.load_agNews(file)
             # tdate = np.array(tdate)
@@ -590,6 +590,57 @@ class dataEngine(Dataset):
         print("taglen: {}".format(taglen/item))
         print(i)
         print(item)
+        return data
+
+    def load_augmentText(self, file, train =True):
+        data = []
+
+        with open(file, newline='') as csvfile:
+            reader = csv.reader(csvfile)
+            # next(reader)
+            for row in reader:
+
+                # if len(row) != 3:
+                #     continue
+                # tag, title, dscp = row
+                dscp, tag = row
+
+                # title_tokens = tokenizer.tokenize(title.strip())
+                # dscp_tokens = title_tokens + tokenizer.tokenize(dscp.strip())
+                dscp_tokens = tokenizer.tokenize(dscp.strip())
+
+                if len(dscp_tokens) > 510:
+                    if self.data_config['overlength_handle'] == 'truncation':
+                        dscp_tokens = dscp_tokens[:510]
+                    else:
+                        continue
+
+                dscp_ids = tokenizer.convert_tokens_to_ids(dscp_tokens)
+
+                tag = tag.strip().split('###')
+                tag = [t for t in tag if t != '']
+
+                if len(tag) == 0:
+                    continue
+
+                for t in tag:
+                    if t not in self.tag2id:
+                        tag_id = len(self.tag2id)
+                        self.tag2id[t] = tag_id
+                        self.id2tag[tag_id] = t
+
+                tag_ids = [self.tag2id[t] for t in tag]
+
+                data.append({
+                    'id': int(id),
+                    'dscp_ids': dscp_ids,
+                    'dscp_tokens': dscp_tokens,
+                    'tag_ids': tag_ids,
+                    'dscp': dscp
+                })
+
+        print("The number of tags for training: {}".format(len(self.tag2id)))
+
         return data
 
     def load_agNews(self, file, train =True):

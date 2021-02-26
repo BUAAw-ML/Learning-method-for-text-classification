@@ -3,8 +3,6 @@
 
 #EN='02'  #experiment_no
 
-
-
 python main.py \
         --experiment_no='wcm_bertAug0.2'  \
         --epochs=100 \
@@ -15,19 +13,43 @@ python main.py \
         --D-lr=0.1 \
         --B-lr=0.001 \
         --save_model_path='./checkpoint' \
-        --data_type='TrainTest_programWeb_freecode_AAPD' \
-        --data_path='../datasets/AAPD' \
-        --use_previousData=1 \
+        --data_type='TrainTest_agNews' \
+        --data_path='../datasets/textAugment' \
+        --use_previousData=0 \
         --model_type='MABert' \
-        --method='semiGAN_MultiLabelMAP' \
+        --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
         --min_tagFrequence=0  \
         --max_tagFrequence=999999  \
         --intanceNum_limit=999999 \
-        --data_split=1000  \
+        --data_split=999999  \
         --test_description='' \
         --resume=''   #  \
         --evaluate=False
+
+#python main.py \
+#        --experiment_no='wcm_bertAug0.2'  \
+#        --epochs=100 \
+#        --epoch_step=90 \
+#        --device_ids=0 \
+#        --batch-size=8 \
+#        --G-lr=0.001 \
+#        --D-lr=0.1 \
+#        --B-lr=0.001 \
+#        --save_model_path='./checkpoint' \
+#        --data_type='TrainTest_programWeb_freecode_AAPD' \
+#        --data_path='../datasets/AAPD' \
+#        --use_previousData=1 \
+#        --model_type='MABert' \
+#        --method='semiGAN_MultiLabelMAP' \
+#        --overlength_handle='truncation' \
+#        --min_tagFrequence=0  \
+#        --max_tagFrequence=999999  \
+#        --intanceNum_limit=999999 \
+#        --data_split=1000  \
+#        --test_description='' \
+#        --resume=''   #  \
+#        --evaluate=False
 
 #方法、epoch_step
 # MLPBert, MABert
