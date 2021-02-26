@@ -72,6 +72,7 @@ def load_data(data_config, data_path=None, data_type='allData', use_previousData
         elif data_type == 'TrainTest_agNews':
 
             file = os.path.join(data_path, 'train.csv')
+            dataset.filterTags_augmentText(file)
             data = dataset.load_augmentText(file)
 
             data = np.array(data)
@@ -592,12 +593,39 @@ class dataEngine(Dataset):
         print(item)
         return data
 
+    def filterTags_augmentText(self, file):
+        tag_occurance = {}
+        with open(file, 'r') as f_tag:
+            reader = csv.reader(f_tag)
+            next(reader)
+            for row in reader:
+
+                _, tag = row
+                tag = tag.strip().split('###')
+                tag = [t for t in tag if t != '']
+
+                for t in tag:
+                    if t not in tag_occurance:
+                        tag_occurance[t] = 1
+                    else:
+                        tag_occurance[t] += 1
+
+        print('Total number of tags: {}'.format(len(tag_occurance)))
+        tags = sorted(tag_occurance.items(), key=lambda x: x[1], reverse=True)
+
+        print(tags)
+
+        for item in tags[self.data_config['min_tagFrequence']:self.data_config['max_tagFrequence']]:
+            self.use_tags[item[0]] = item[1]
+
+        print(self.use_tags)
+
     def load_augmentText(self, file, train =True):
         data = []
 
         with open(file, newline='') as csvfile:
             reader = csv.reader(csvfile)
-            # next(reader)
+            next(reader)
             for row in reader:
 
                 # if len(row) != 3:
