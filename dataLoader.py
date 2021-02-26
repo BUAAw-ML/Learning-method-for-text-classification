@@ -648,6 +648,9 @@ class dataEngine(Dataset):
                 tag = tag.strip().split('###')
                 tag = [t for t in tag if t != '']
 
+                if self.use_tags is not None:
+                    tag = [t for t in tag if t in self.use_tags]
+
                 if len(tag) == 0:
                     continue
 
