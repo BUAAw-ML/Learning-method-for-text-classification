@@ -44,7 +44,7 @@ class MABert(nn.Module):
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
                         / torch.sum(tag_mask, dim=1, keepdim=True)  #labels_num, hidden_size
 
-        tag_embedding = torch.cat((tag_embedding, self.discriminator), 0)
+        tag_embedding = torch.cat((tag_embedding, feat), 0)
 
         masks = torch.unsqueeze(attention_mask, 1)  # N, 1, L  .bool()
         attention = (torch.matmul(token_feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(~masks.bool(), torch.tensor(-np.inf))
