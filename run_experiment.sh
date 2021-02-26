@@ -19,7 +19,7 @@ python main.py \
         --model_type='MABert' \
         --method='MultiLabelMAP' \
         --overlength_handle='truncation' \
-        --min_tagFrequence=10  \
+        --min_tagFrequence=250  \
         --max_tagFrequence=999999  \
         --intanceNum_limit=999999 \
         --data_split=999999  \
