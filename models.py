@@ -18,7 +18,7 @@ class MABert(nn.Module):
 
         self.num_classes = num_classes
 
-        self.class_weight = Parameter(torch.Tensor(num_classes, 768).uniform_(0, 1), requires_grad=False).cuda(device)
+        self.class_weight = Parameter(torch.Tensor(num_classes+1, 768).uniform_(0, 1), requires_grad=False).cuda(device)
         self.class_weight.requires_grad = True
 
         self.discriminator = Parameter(torch.Tensor(1, 768).uniform_(0, 1), requires_grad=False).cuda(device)
@@ -44,7 +44,7 @@ class MABert(nn.Module):
         tag_embedding = torch.sum(tag_embedding * tag_mask.unsqueeze(-1), dim=1) \
                         / torch.sum(tag_mask, dim=1, keepdim=True)  #labels_num, hidden_size
 
-        # tag_embedding = torch.cat((tag_embedding, self.discriminator), 0)
+        tag_embedding = torch.cat((tag_embedding, self.discriminator), 0)
 
         masks = torch.unsqueeze(attention_mask, 1)  # N, 1, L  .bool()
         attention = (torch.matmul(token_feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(~masks.bool(), torch.tensor(-np.inf))
@@ -66,7 +66,7 @@ class MABert(nn.Module):
         # attention_out = self.act(attention_out)
         # attention_out = self.Linear2(attention_out).squeeze(-1)
 
-        logit = torch.sigmoid(attention_out)#[:, :-1]
+        logit = torch.sigmoid(attention_out)[:, :-1]
 
         # discrimate_hidden = torch.sum(
         #     torch.matmul(hidden_out[:, -1].squeeze(-2), self.class_weight.transpose(0, 1)), -1, keepdim=True)
@@ -79,17 +79,17 @@ class MABert(nn.Module):
 
         # print(torch.sum(attention,-2))
 
-        # fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
-        # # print(torch.sum(torch.sum(attention,-2) > 1, -1))
-        # fake_ids = torch.where(torch.sum(attention,-2) > 0.2, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 30000).long().cuda(0), fake_ids)
-        #
-        # # fake_ids[fake_ids > 102] -=
-        #
-        # feat = self.bert(fake_ids,
-        #                        token_type_ids=token_type_ids,
-        #                        attention_mask=attention_mask)[0]#.detach()
+        fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
+        # print(torch.sum(torch.sum(attention,-2) > 1, -1))
+        fake_ids = torch.where(torch.sum(attention,-2) > 0.2, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 30000).long().cuda(0), fake_ids)
 
-        feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
+        # fake_ids[fake_ids > 102] -=
+
+        feat = self.bert(fake_ids,
+                               token_type_ids=token_type_ids,
+                               attention_mask=attention_mask)[0]#.detach()
+
+        # feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
         # feat += token_feat.detach()
         # feat = torch.mean(feat, 1)
         attention_fake = (torch.matmul(feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(
