@@ -58,7 +58,7 @@ class MABert(nn.Module):
 
         attention_out = torch.matmul(attention, token_feat)   # N, labels_num, hidden_size
 
-        attention_out = attention_out * tag_embedding#self.class_weight
+        attention_out = attention_out * self.class_weight
         attention_out = torch.sum(attention_out, -1)
 
         # attention_out = self.Linear1(attention_out)
@@ -72,23 +72,21 @@ class MABert(nn.Module):
         #
         # attention_out = torch.cat((attention_out, discrimate_hidden), -1)
 
-        flatten = self.output(attention_out)[:,-1]
-
         #################fake sample process#######
 
         # print(torch.sum(attention,-2))
 
-        fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
-        # print(torch.sum(torch.sum(attention,-2) > 1, -1))
-        fake_ids = torch.where(torch.sum(attention,-2) > 0.2, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 30000).long().cuda(0), fake_ids)
+        # fake_ids = ids.clone()#.detach() torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 1000).long().cuda(0)
+        # # print(torch.sum(torch.sum(attention,-2) > 1, -1))
+        # fake_ids = torch.where(torch.sum(attention,-2) > 0.2, torch.Tensor(fake_ids.shape[0], fake_ids.shape[1]).uniform_(150, 30000).long().cuda(0), fake_ids)
+        #
+        # # fake_ids[fake_ids > 102] -=
+        #
+        # feat = self.bert(fake_ids,
+        #                        token_type_ids=token_type_ids,
+        #                        attention_mask=attention_mask)[0]#.detach()
 
-        # fake_ids[fake_ids > 102] -=
-
-        feat = self.bert(fake_ids,
-                               token_type_ids=token_type_ids,
-                               attention_mask=attention_mask)[0]#.detach()
-
-        # feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
+        feat = feat[:,:token_feat.shape[1],:] # N, L, hidden_size
         # feat += token_feat.detach()
         # feat = torch.mean(feat, 1)
         attention_fake = (torch.matmul(feat, tag_embedding.transpose(0, 1))).transpose(1, 2).masked_fill(
@@ -103,9 +101,8 @@ class MABert(nn.Module):
 
         # print('+',torch.max(attention_fake,-1)[0])
 
-        hidden_out_fake = torch.matmul(attention_fake, feat)  # N, labels_num, hidden_size
+        attention_out_fake = torch.matmul(attention_fake, feat)  # N, labels_num, hidden_size
         # discrimate = torch.matmul(feat, tag_embedding.transpose(0, 1))
-        attention_out_fake = hidden_out_fake#[:, :-1]
 
         attention_out_fake = attention_out_fake * self.class_weight
         attention_out_fake = torch.sum(attention_out_fake, -1)
@@ -115,8 +112,6 @@ class MABert(nn.Module):
         # discrimate_hidden = torch.sum(torch.matmul(hidden_out_fake[:,-1].squeeze(-2), self.class_weight.transpose(0, 1)),-1, keepdim=True)
 
         # attention_out_fake = torch.cat((attention_out_fake, discrimate_hidden), -1)
-
-        prob = self.output(attention_out_fake)[:, -1]
 
         # discrimate = torch.mean(attention_out_fake, -2, keepdim=True)
         # discrimate = torch.sum(discrimate, -1, keepdim=True)
@@ -142,12 +137,12 @@ class MABert(nn.Module):
 
         # print(torch.sum(attention_out_fake - attention_out > 0, -1))
 
-        # attention_out = torch.sum(attention_out, -1, keepdim=True)
-        # attention_out_fake = torch.sum(attention_out_fake, -1, keepdim=True)
-        #
-        # prob = torch.cat((attention_out_fake,attention_out),-1)
-        # # print(prob)
-        # prob = self.output(prob)
+        attention_out = torch.sum(attention_out, -1, keepdim=True)
+        attention_out_fake = torch.sum(attention_out_fake, -1, keepdim=True)
+
+        prob = torch.cat((attention_out_fake,attention_out),-1)
+        # print(prob)
+        prob = self.output(prob)
 
         # prob = torch.mean(prob,-1)
 
@@ -185,7 +180,7 @@ class MABert(nn.Module):
         # prob = torch.max(pred[:,:self.num_classes],-1)[0] - 0.5
         # prob = self.relu(prob)
 
-        return flatten, logit, prob, attention
+        return prob[:,1], logit, prob[:,0], attention
 
     # def forward(self, ids, token_type_ids, attention_mask, encoded_tag, tag_mask, feat):
     #     token_feat = self.bert(ids,
