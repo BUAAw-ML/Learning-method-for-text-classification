@@ -3,3 +3,4 @@
 *__pycache__/
 /checkpoint
 /logs
+/exp_output_dir
