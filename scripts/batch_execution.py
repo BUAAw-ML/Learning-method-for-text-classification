@@ -32,12 +32,12 @@ COMMON_CONFIG = {
         #  "[KBS]stack-overflow_1100-600-10k+acq500+trEpo100"
         # "[InfoSci]aapd_small+acq500+trEpo50"
         "--chart_group_name": "[InfoSci]aapd_small+acq500+trEpo50",
-        "--acquire_method": "dataBased_coreset_hidFeat",
+        "--acquire_method": "modelBased_BEAL",
         "--ALmethod_desc": "", #
         "--total_acquire_rounds": 17,
         "--num_paraphrases_per_text": 0,
         "--acquire_data_num_per_round": 500,
-        "--seed": 64,
+        "--seed": 128,
         "--dropout_samp_num": 1
      },
      
