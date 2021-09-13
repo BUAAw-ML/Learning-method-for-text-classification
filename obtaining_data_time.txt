@@ -1,0 +1,27 @@
+
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL: 22.75589420920924 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL: 22.827857469257555 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 Random: 0.005583273737054122 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL: 107.68346691131592 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 Random: 0.005462847257915296 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL: 108.44376215181853 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout1: 11.692686934220163 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout1: 11.810913035744115 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout50: 536.7934095985011 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout50: 535.3029515241321 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout100: 1072.3541378222014 
+开始17轮：
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout50: 610.0252200216055 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout50: 622.6073545217514 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout100: 1231.6477311849594 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout100: 1235.7645213603973 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout1: 13.173212438821793 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 Random_dropout1: 0.005268722772598267 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 gradBased_badge_dropout1: 165.2259048819542 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 Random_dropout1: 0.00548166036605835 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 dataBased_coreset_hidFeat_dropout1: 152.54356069862843 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 gradBased_badge_dropout1: 173.47385880351067 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 modelBased_BEAL_dropout1: 13.750538617372513 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 dataBased_coreset_hidFeat_dropout1: 107.11725042760372 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 gradBased_badge_dropout1: 164.35762631893158 
+The average obtaining data time (s) of [KBS]stack-overflow_1100-600-10k+acq500+trEpo100 gradBased_badge_dropout1: 174.6485430598259 
