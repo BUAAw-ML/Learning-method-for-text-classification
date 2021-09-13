@@ -13,7 +13,7 @@ logger = log.setup_custom_logger(__name__)
 
 def get_root_dir():
     """Return ``~/cache``, the root dir to store datasets and common resources."""
-    root_dir = os.path.join(os.path.expanduser('~'), "/home/jovyan/BY1706161/Learning_method_for_text_classification/cache")#os.path.expanduser('~')
+    root_dir = os.path.join(os.path.expanduser('~'), "/home/wqb/Learning_method_for_text_classification/cache")#os.path.expanduser('~')
     os.makedirs(root_dir, exist_ok=True)
     return root_dir
 
