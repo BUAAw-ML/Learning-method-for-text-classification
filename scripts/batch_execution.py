@@ -4,11 +4,11 @@ import subprocess
 
 GPU_CONFIG = {
     "single": {
-        "--classifier_id": 1,
-        "--bert_gpu_id": 1,
-        "--use_gpu_id": 1,
-        "--gpt2_gpu_id": 1,
-        "--strategy_gpu_id": 1,
+        "--classifier_id": 0,
+        "--bert_gpu_id": 0,
+        "--use_gpu_id": 0,
+        "--gpt2_gpu_id": 0,
+        "--strategy_gpu_id": 0,
     },
     "multi": {
         "--classifier_id": 0,
