@@ -61,8 +61,8 @@ class MetricBundle(object):
             self.add_metric(GloVeSemanticSimilarityMetric(**kargs), DIRECTION_HIGHER_BETTER)
         # if enable_gpt2_grammar_quality:
         #     self.add_metric(GPT2GrammarQualityMetric(**kargs), DIRECTION_LOWER_BETTER)
-        # if enable_bert_clf_prediction:
-        #     self.add_classifier(BertClassifier(**kargs), set_target_clf=True)
+        if enable_bert_clf_prediction:
+            self.add_classifier(BertClassifier(**kargs), set_target_clf=True)
         print("Init MetricBundle!")
 
     def add_metric(self, metric, direction):
