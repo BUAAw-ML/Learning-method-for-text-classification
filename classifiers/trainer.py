@@ -142,7 +142,7 @@ class MLC_Trainer(Trainer): #training the model of multi-label classification ta
 
         target_var = self.state['target']
         ids, token_type_ids, attention_mask = self.state['input']
-
+        print("on_forward")
         if self.state['use_gpu']:
             ids = ids.cuda(self.state['device_ids'][0])
             token_type_ids = token_type_ids.cuda(self.state['device_ids'][0])
@@ -226,7 +226,7 @@ class MLC_Trainer(Trainer): #training the model of multi-label classification ta
 
         for epoch in range(self.state['train_epochs']):
             
-
+            print("learning")
             self.state['epoch'] = epoch
             # lr = self.adjust_learning_rate(optimizer)
 
@@ -290,7 +290,7 @@ class MLC_Trainer(Trainer): #training the model of multi-label classification ta
         end = time.time()
 
         for i, (input, target) in enumerate(data_loader):
-
+            print("train")
             # measure data loading time
             self.state['iteration'] = i
             self.state['data_time_batch'] = time.time() - end
