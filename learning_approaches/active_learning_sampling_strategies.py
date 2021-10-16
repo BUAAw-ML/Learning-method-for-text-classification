@@ -30,7 +30,8 @@ class Acquisition(object):
 
         self.dropout_samp_num = dropout_samp_num
 
-        self.labels_cardinality = []
+        self._obtain_data_time = []
+
 
     #-------------------------Obtain data for initing model-----------------------------
     def initial_data(self):
@@ -62,23 +63,6 @@ class Acquisition(object):
         self.train_id_set.update(set(acquire_data_ids))
         return acquire_data_ids
 
-    def modelLabelBased_samplingStrategy(self, information_cal_name):
-        
-        unlabel_data = np.array(self.dataset)[sorted(list(self.unlabel_id_set))]
-
-        output = self._trainer.predict(self._model, unlabel_data, self.dropout_samp_num)
-
-        information_calculation_func = get_information_calculation_by_name(information_cal_name)
-        
-        information_values = information_calculation_func(output, round(mean(self.labels_cardinality)))
-
-        acquire_data_ids = np.argsort(-np.array(information_values))[:self.acquire_data_num]
-        acquire_data_ids = np.array(sorted(list(self.unlabel_id_set)))[acquire_data_ids]
-
-        self.train_id_set.update(set(acquire_data_ids))
-
-        return acquire_data_ids
-
     def dataBased_samplingStrategy(self, select_method_name, feature_type):
 
         if feature_type == "hidFeat":
@@ -97,9 +81,25 @@ class Acquisition(object):
         self.train_id_set.update(set(acquire_data_ids))
         return acquire_data_ids
 
+    def gradBased_samplingStrategy(self, select_method_name):
+
+        output = np.array(self._trainer.predict(self._model, self.dataset, samp_num=1, return_penultimateLayer=True)).squeeze(1)
+        label_feature = output[sorted(list(self.train_id_set))]
+        unlabel_feature = output[sorted(list(self.unlabel_id_set))]
+            
+        select_method_func = get_select_method_by_name(select_method_name)
+        acquire_data_ids = select_method_func(label_feature, unlabel_feature, self.acquire_data_num)
+
+        acquire_data_ids = np.array(sorted(list(self.unlabel_id_set)))[acquire_data_ids]
+
+        self.train_id_set.update(set(acquire_data_ids))
+        return acquire_data_ids
+
     #——————————————————————————————Invoking a sampling strategy to obtain data————————————————————————————————————————————
     def obtain_data(self, acquire_method, acquire_data_num, model):
         
+        end = time.time()
+
         self.unlabel_id_set = self.data_id_set - self.train_id_set
         self.acquire_data_num = acquire_data_num
         self._model = model
@@ -114,9 +114,9 @@ class Acquisition(object):
             elif 'modelBased' in acquire_method:
                 print(acquire_method + " Sampling")
                 acquire_data_ids = self.modelBased_samplingStrategy(information_cal_name=acquire_method.split('_')[1])
-            elif 'modelLabelBased' in acquire_method:
+            elif 'gradBased' in acquire_method:
                 print(acquire_method + " Sampling")
-                acquire_data_ids = self.modelLabelBased_samplingStrategy(information_cal_name=acquire_method.split('_')[1])
+                acquire_data_ids = self.gradBased_samplingStrategy(select_method_name=acquire_method.split('_')[1])
             elif 'dataBased' in acquire_method:
                 print(acquire_method + " Sampling")
                 acquire_data_ids = self.dataBased_samplingStrategy(select_method_name=acquire_method.split('_')[1],
@@ -124,7 +124,6 @@ class Acquisition(object):
             else:
                 raise NotImplementedError()
 
-        if 'modelLabelBased' in acquire_method:
-            self.labels_cardinality.extend([len(acquire_data['label']) for acquire_data in np.array(self.dataset)[list(acquire_data_ids)]])
-
+        self._obtain_data_time.append(time.time() - end)
+        
         return acquire_data_ids

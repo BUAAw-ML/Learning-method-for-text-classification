@@ -3,6 +3,10 @@ from utils.chartTool import *
 from scipy import stats
 from scipy.spatial import distance_matrix
 
+from copy import deepcopy as deepcopy
+from sklearn.metrics import pairwise_distances
+import pdb
+from scipy import stats
 
 ###The larger the "information" value, the more uncertain
 
@@ -16,16 +20,17 @@ def get_information_calculation_by_name(calculation_name):
             return cal_bayesian_confidence
         elif calculation_name == "expectedLoss":
             return cal_bayesian_expectedLoss
-        elif calculation_name == "positiveExpectedLoss":
-            return cal_bayesian_positiveExpectedLoss
-        elif calculation_name == "test":
-            return cal_bayesian_test
+        elif calculation_name == "BEAL":
+            return cal_bayesian_BEAL
         elif calculation_name == "entropy":
             return cal_entropy
         elif calculation_name == "BALD":
             return cal_bayesian_BALD
+        elif calculation_name == "test":
+            return cal_bayesian_test
         else:
             assert 0
+
 
 def cal_entropy(prediction):
     prediction = np.array(prediction)
@@ -152,32 +157,17 @@ def cal_bayesian_test(prediction):
 
     def rankedList(rList):
         rList = np.array(rList)
-        gain = 2 ** rList - 1
-        # gain = rList
-
-        # discounts = np.log2(np.arange(len(rList)) + 2)
+        gain = (2 ** rList - 1)- np.std(rList, axis=0)
         discounts = np.arange(len(rList)) + 1
-        # discounts = np.exp(np.arange(len(rList)))
-        return np.sum(gain / discounts)#/ discounts
+        return np.sum(gain / discounts)
 
     information_values = []
 
     for index, item in enumerate(prediction):
-        #item shape: nsample * nlabel
-
-        dList = []
-        for i in range(len(item)):
-            rL = sorted(item[i], reverse=True)
-            dList.append(rankedList(rL))
-
-        # t = np.mean(2 ** np.array(item) - 1, axis=1)
-        # rankedt = sorted(t.tolist(), reverse=True)
-        # d = rankedList(rankedt)
 
         item_arr = np.array(item)
 
-        posterior_prediction = np.mean(item_arr, axis=0)
-        posterior_prediction_list = list(posterior_prediction)
+        posterior_prediction = np.mean(2 ** item_arr - 1, axis=0)
         
         rankedt = item_arr[:,np.argsort(-posterior_prediction)].tolist()  # nsample * nlabel
 
@@ -185,34 +175,33 @@ def cal_bayesian_test(prediction):
         for i in range(len(rankedt)):
             dList2.append(rankedList(rankedt[i]))
 
-        information = np.mean(np.array(dList))  - np.mean(np.array(dList2))
+        information =  - np.mean(np.array(dList2))
 
         information_values.append(information)
 
     return information_values
 
+def cal_bayesian_BEAL(prediction):
 
-def cal_bayesian_positiveExpectedLoss(prediction, labels_cardinality):
-    
     def rankedList(rList):
         rList = np.array(rList)
         gain = 2 ** rList - 1
-        return np.sum(gain)
+        discounts = np.arange(len(rList)) + 1
+        return np.sum(gain / discounts)
 
     information_values = []
 
     for index, item in enumerate(prediction):
-        #item shape: nsample * nlabel
 
         item_arr = np.array(item)
 
-        posterior_prediction = np.mean(item_arr, axis=0)
+        posterior_prediction = np.mean(2 ** item_arr - 1, axis=0)
         
         rankedt = item_arr[:,np.argsort(-posterior_prediction)].tolist()  # nsample * nlabel
 
         dList2 = []
         for i in range(len(rankedt)):
-            dList2.append(rankedList(rankedt[i][:labels_cardinality]))
+            dList2.append(rankedList(rankedt[i]))
 
         information =  - np.mean(np.array(dList2))
 
@@ -224,8 +213,55 @@ def cal_bayesian_positiveExpectedLoss(prediction, labels_cardinality):
 def get_select_method_by_name(method_name):
         if method_name == "coreset":
             return greedy_k_center
+        elif method_name == "badge":
+            return cal_badge
         else:
             assert 0
+
+def cal_badge(labeled, unlabeled, amount):
+
+    def init_centers(X, K):
+        ind = np.argmax([np.linalg.norm(s, 2) for s in X])
+        mu = [X[ind]]
+        indsAll = [ind]
+        centInds = [0.] * len(X)
+        cent = 0
+        print('#Samps\tTotal Distance')
+        while len(mu) < K:
+            if len(mu) == 1:
+                D2 = pairwise_distances(X, mu).ravel().astype(float)
+            else:
+                newD = pairwise_distances(X, [mu[-1]]).ravel().astype(float)
+                for i in range(len(X)):
+                    if D2[i] >  newD[i]:
+                        centInds[i] = cent
+                        D2[i] = newD[i]
+            # print(str(len(mu)) + '\t' + str(sum(D2)), flush=True)
+            if sum(D2) == 0.0: pdb.set_trace()
+            D2 = D2.ravel().astype(float)
+            Ddist = (D2 ** 2)/ sum(D2 ** 2)
+            customDist = stats.rv_discrete(name='custm', values=(np.arange(len(D2)), Ddist))
+            ind = customDist.rvs(size=1)[0]
+            while ind in indsAll: ind = customDist.rvs(size=1)[0]
+            mu.append(X[ind])
+            indsAll.append(ind)
+            cent += 1
+        return indsAll  
+    
+    embDim = 512
+    label_num = unlabeled.shape[1] - 512
+    gradEmbedding = np.zeros([unlabeled.shape[0], embDim * label_num])
+
+    for j in range(unlabeled.shape[0]):
+        for c in range(label_num):
+            if unlabeled[j][c] >= 0.5:
+                gradEmbedding[j][embDim * c : embDim * (c+1)] = deepcopy(unlabeled[j][label_num:]) * (1 - unlabeled[j][c])
+            else:
+                gradEmbedding[j][embDim * c : embDim * (c+1)] = deepcopy(unlabeled[j][label_num:]) * (-1 * unlabeled[j][c])
+
+    chosen = init_centers(gradEmbedding, amount)
+    
+    return np.array(chosen)
 
 def greedy_k_center(labeled, unlabeled, amount):
 
@@ -264,7 +300,7 @@ def update_chart(performance, chart_group_name, desc, acquire_method, acquire_da
 
     if acquire_method == 'Random':
         method_name = "Random+"
-    elif 'modelBased' in acquire_method or 'modelLabelBased' in acquire_method:
+    elif 'modelBased' in acquire_method or 'gradBased' in acquire_method:
         if dropout_samp_num == 1:
             method_name = "Deterministic+"
         elif dropout_samp_num > 1:

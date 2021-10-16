@@ -4,48 +4,6 @@ import torch
 from tqdm import tqdm
 import numpy as np
 
-
-def download_url(url, destination=None, progress_bar=True):
-    """Download a URL to a local file.
-
-    Parameters
-    ----------
-    url : str
-        The URL to download.
-    destination : str, None
-        The destination of the file. If None is given the file is saved to a temporary directory.
-    progress_bar : bool
-        Whether to show a command-line progress bar while downloading.
-
-    Returns
-    -------
-    filename : str
-        The location of the downloaded file.
-
-    Notes
-    -----
-    Progress bar use/example adapted from tqdm documentation: https://github.com/tqdm/tqdm
-    """
-
-    def my_hook(t):
-        last_b = [0]
-
-        def inner(b=1, bsize=1, tsize=None):
-            if tsize is not None:
-                t.total = tsize
-            if b > 0:
-                t.update((b - last_b[0]) * bsize)
-            last_b[0] = b
-
-        return inner
-
-    if progress_bar:
-        with tqdm(unit='B', unit_scale=True, miniters=1, desc=url.split('/')[-1]) as t:
-            filename, _ = urlretrieve(url, filename=destination, reporthook=my_hook(t))
-    else:
-        filename, _ = urlretrieve(url, filename=destination)
-
-
 class AveragePrecisionMeter(object):
     """
     The APMeter measures the average precision per class.
@@ -175,7 +133,7 @@ class AveragePrecisionMeter(object):
         tmp = self.scores.cpu().numpy()
         for i in range(n):
             for ind in index[i]:
-                scores[i, ind] = 1 if tmp[i, ind] >= 0 else -1
+                scores[i, ind] = 1 if tmp[i, ind] >= 0.5 else -1
         return self.evaluation(scores, targets)
 
 
@@ -187,8 +145,8 @@ class AveragePrecisionMeter(object):
             targets = targets_[:, k]
             targets[targets == -1] = 0
             Ng[k] = np.sum(targets == 1)
-            Np[k] = np.sum(scores >= 0)
-            Nc[k] = np.sum(targets * (scores >= 0))
+            Np[k] = np.sum(scores >= 0.5)
+            Nc[k] = np.sum(targets * (scores >= 0.5))
 
         # Np[Np == 0] = 1
         OP = np.sum(Nc) / np.sum(Np + 1e-5)
@@ -202,27 +160,5 @@ class AveragePrecisionMeter(object):
         return OP, OR, OF1, CP, CR, CF1
 
 
-def gen_A(num_classes, t, co_occur_mat):
-    import pickle
-    _adj = co_occur_mat.numpy()
-    print("the number of directed edges in the graph: {}".format(np.sum(_adj >= t) - num_classes))
-    _nums = _adj.diagonal()
-    _nums = _nums[:, np.newaxis]
-    _adj = _adj / _nums
-    _adj[_adj < t] = 0
-    _adj[_adj >= t] = 1
-    _adj = _adj * 0.25 / (_adj.sum(0, keepdims=True) + 1e-6)
-    _adj = _adj + np.identity(num_classes, np.int)
-    return _adj
 
 
-def gen_adj(A):
-    D = torch.pow(A.sum(1), -0.5)
-    D = torch.diag(D)
-    adj = torch.matmul(torch.matmul(A, D).t(), D)
-    return adj
-
-
-def prepareData():
-
-    return
